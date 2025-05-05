@@ -160,6 +160,7 @@ class Board:
 
                 if target in enemy:
                     beyond = (target[0] + direction[0], target[1] + direction[1])
+                    # Ally Ally Enemy Blank
                     if self.is_valid(beyond) and self.is_empty(beyond):
                         new_board = copy.deepcopy(self)
                         a_set = new_board.white if player else new_board.black
@@ -174,6 +175,7 @@ class Board:
 
                         all_board.append(new_board)
 
+                    # Ally Ally Enemy X(invalid)
                     elif not self.is_valid(beyond):
                         # 推出場外也合法
                         new_board = copy.deepcopy(self)
@@ -186,6 +188,16 @@ class Board:
                         e_set.remove(target)
 
                         all_board.append(new_board)
+
+                # Ally Ally Blank
+                elif self.is_empty(target):
+                    new_board = copy.deepcopy(self)
+                    a_set = new_board.white if player else new_board.black
+
+                    a_set.remove(p1)
+                    a_set.add(target)
+
+                    all_board.append(new_board)
 
         return all_board
     
@@ -251,6 +263,17 @@ class Board:
                                 a_set.add(e1)
                                 e_set.remove(e1)
                                 all_board.append(new_board)
+
+                    # 3 推 0
+                    elif self.is_empty(e1):
+                        new_board = copy.deepcopy(self)
+                        a_set = new_board.white if player else new_board.black
+
+                        a_set.remove(p1)
+                        a_set.add(e1)
+                        all_board.append(new_board)
+
+
 
         return all_board
         
