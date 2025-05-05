@@ -72,8 +72,8 @@ class Board:
             self.all_inline_push_three_piece(player)
         )
 
-    def get_perpendicular_dirs(self, dir):
-        idx = self.direction_tuple.index(dir)
+    def get_perpendicular_directions(self, direction):
+        idx = self.direction_tuple.index(direction)
         # 六個方向圍成環狀，垂直的兩個方向在±2 位置上
         perp1 = self.direction_tuple[(idx + 2) % 6]
         perp2 = self.direction_tuple[(idx - 2) % 6]
@@ -84,8 +84,8 @@ class Board:
         pieces = self.white if player else self.black
 
         for piece in pieces:
-            for dir in self.direction_tuple:
-                next_pos = (piece[0] + dir[0], piece[1] + dir[1])
+            for direction in self.direction_tuple:
+                next_pos = (piece[0] + direction[0], piece[1] + direction[1])
                 if self.is_valid(next_pos) and self.is_empty(next_pos):
                     new_board = copy.deepcopy(self)
                     target_set = new_board.white if player else new_board.black
@@ -100,15 +100,15 @@ class Board:
         pieces = self.white if player else self.black
 
         for p1 in pieces:
-            for dir in self.direction_tuple:
-                p2 = (p1[0] + dir[0], p1[1] + dir[1])
+            for direction in self.direction_tuple:
+                p2 = (p1[0] + direction[0], p1[1] + direction[1])
                 if p2 in pieces:
                     # 找到一對相鄰棋子
                     # 接著找與原方向垂直的 sidestep 方向
-                    perp_dirs = self.get_perpendicular_dirs(dir)
-                    for move_dir in perp_dirs:
-                        np1 = (p1[0] + move_dir[0], p1[1] + move_dir[1])
-                        np2 = (p2[0] + move_dir[0], p2[1] + move_dir[1])
+                    perp_directions = self.get_perpendicular_directions(direction)
+                    for move_direction in perp_directions:
+                        np1 = (p1[0] + move_direction[0], p1[1] + move_direction[1])
+                        np2 = (p2[0] + move_direction[0], p2[1] + move_direction[1])
                         if self.is_valid(np1) and self.is_valid(np2) and self.is_empty(np1) and self.is_empty(np2):
                             new_board = copy.deepcopy(self)
                             target_set = new_board.white if player else new_board.black
@@ -125,16 +125,16 @@ class Board:
         pieces = self.white if player else self.black
 
         for p1 in pieces:
-            for dir in self.direction_tuple:
-                p2 = (p1[0] + dir[0], p1[1] + dir[1])
-                p3 = (p2[0] + dir[0], p2[1] + dir[1])
+            for direction in self.direction_tuple:
+                p2 = (p1[0] + direction[0], p1[1] + direction[1])
+                p3 = (p2[0] + direction[0], p2[1] + direction[1])
                 if p2 in pieces and p3 in pieces:
                     # 找到三顆連線的棋子
-                    perp_dirs = self.get_perpendicular_dirs(dir)
-                    for move_dir in perp_dirs:
-                        np1 = (p1[0] + move_dir[0], p1[1] + move_dir[1])
-                        np2 = (p2[0] + move_dir[0], p2[1] + move_dir[1])
-                        np3 = (p3[0] + move_dir[0], p3[1] + move_dir[1])
+                    perp_directions = self.get_perpendicular_directions(direction)
+                    for move_direction in perp_directions:
+                        np1 = (p1[0] + move_direction[0], p1[1] + move_direction[1])
+                        np2 = (p2[0] + move_direction[0], p2[1] + move_direction[1])
+                        np3 = (p3[0] + move_direction[0], p3[1] + move_direction[1])
                         if all(self.is_valid(p) and self.is_empty(p) for p in [np1, np2, np3]):
                             new_board = copy.deepcopy(self)
                             target_set = new_board.white if player else new_board.black
@@ -150,16 +150,16 @@ class Board:
         enemy = self.black if player else self.white
 
         for p1 in ally:
-            for dir in self.direction_tuple:
-                p2 = (p1[0] + dir[0], p1[1] + dir[1])
+            for direction in self.direction_tuple:
+                p2 = (p1[0] + direction[0], p1[1] + direction[1])
                 if p2 not in ally:
                     continue  # 兩子不相連，略過
 
                 # 嘗試 push
-                target = (p2[0] + dir[0], p2[1] + dir[1])
+                target = (p2[0] + direction[0], p2[1] + direction[1])
 
                 if target in enemy:
-                    beyond = (target[0] + dir[0], target[1] + dir[1])
+                    beyond = (target[0] + direction[0], target[1] + direction[1])
                     if self.is_valid(beyond) and self.is_empty(beyond):
                         new_board = copy.deepcopy(self)
                         a_set = new_board.white if player else new_board.black
@@ -195,18 +195,18 @@ class Board:
         enemy = self.black if player else self.white
 
         for p1 in ally:
-            for dir in self.direction_tuple:
-                p2 = (p1[0] + dir[0], p1[1] + dir[1])
-                p3 = (p2[0] + dir[0], p2[1] + dir[1])
+            for direction in self.direction_tuple:
+                p2 = (p1[0] + direction[0], p1[1] + direction[1])
+                p3 = (p2[0] + direction[0], p2[1] + direction[1])
                 if p2 in ally and p3 in ally:
                     # 接下來就是看能不能推一或兩顆敵子
-                    e1 = (p3[0] + dir[0], p3[1] + dir[1])
-                    e2 = (e1[0] + dir[0], e1[1] + dir[1])
+                    e1 = (p3[0] + direction[0], p3[1] + direction[1])
+                    e2 = (e1[0] + direction[0], e1[1] + direction[1])
 
                     if e1 in enemy:
                         if e2 in enemy:
                             # 3 推 2
-                            e3 = (e2[0] + dir[0], e2[1] + dir[1])
+                            e3 = (e2[0] + direction[0], e2[1] + direction[1])
                             if not self.is_valid(e3):
                                 # 推出界外（合法）
                                 new_board = copy.deepcopy(self)
