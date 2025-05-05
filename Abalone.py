@@ -75,9 +75,9 @@ class Board:
     def get_perpendicular_directions(self, direction):
         idx = self.direction_tuple.index(direction)
         # 六個方向圍成環狀，垂直的兩個方向在±2 位置上
-        perp1 = self.direction_tuple[(idx + 2) % 6]
-        perp2 = self.direction_tuple[(idx - 2) % 6]
-        return [perp1, perp2]
+        pera1 = self.direction_tuple[(idx + 2) % 6]
+        pera2 = self.direction_tuple[(idx - 2) % 6]
+        return [pera1, pera2]
     
     def all_next_move_one_piece(self, player=True):
         all_board = []
@@ -99,23 +99,23 @@ class Board:
         all_board = []
         pieces = self.white if player else self.black
 
-        for p1 in pieces:
+        for a1 in pieces:
             for direction in self.direction_tuple:
-                p2 = (p1[0] + direction[0], p1[1] + direction[1])
-                if p2 in pieces:
+                a2 = (a1[0] + direction[0], a1[1] + direction[1])
+                if a2 in pieces:
                     # 找到一對相鄰棋子
                     # 接著找與原方向垂直的 sidestep 方向
                     perp_directions = self.get_perpendicular_directions(direction)
                     for move_direction in perp_directions:
-                        np1 = (p1[0] + move_direction[0], p1[1] + move_direction[1])
-                        np2 = (p2[0] + move_direction[0], p2[1] + move_direction[1])
-                        if self.is_valid(np1) and self.is_valid(np2) and self.is_empty(np1) and self.is_empty(np2):
+                        na1 = (a1[0] + move_direction[0], a1[1] + move_direction[1])
+                        na2 = (a2[0] + move_direction[0], a2[1] + move_direction[1])
+                        if self.is_valid(na1) and self.is_valid(na2) and self.is_empty(na1) and self.is_empty(na2):
                             new_board = copy.deepcopy(self)
                             target_set = new_board.white if player else new_board.black
-                            target_set.remove(p1)
-                            target_set.remove(p2)
-                            target_set.add(np1)
-                            target_set.add(np2)
+                            target_set.remove(a1)
+                            target_set.remove(a2)
+                            target_set.add(na1)
+                            target_set.add(na2)
                             all_board.append(new_board)
 
         return all_board
@@ -124,22 +124,22 @@ class Board:
         all_board = []
         pieces = self.white if player else self.black
 
-        for p1 in pieces:
+        for a1 in pieces:
             for direction in self.direction_tuple:
-                p2 = (p1[0] + direction[0], p1[1] + direction[1])
-                p3 = (p2[0] + direction[0], p2[1] + direction[1])
-                if p2 in pieces and p3 in pieces:
+                a2 = (a1[0] + direction[0], a1[1] + direction[1])
+                a3 = (a2[0] + direction[0], a2[1] + direction[1])
+                if a2 in pieces and a3 in pieces:
                     # 找到三顆連線的棋子
                     perp_directions = self.get_perpendicular_directions(direction)
                     for move_direction in perp_directions:
-                        np1 = (p1[0] + move_direction[0], p1[1] + move_direction[1])
-                        np2 = (p2[0] + move_direction[0], p2[1] + move_direction[1])
-                        np3 = (p3[0] + move_direction[0], p3[1] + move_direction[1])
-                        if all(self.is_valid(p) and self.is_empty(p) for p in [np1, np2, np3]):
+                        na1 = (a1[0] + move_direction[0], a1[1] + move_direction[1])
+                        na2 = (a2[0] + move_direction[0], a2[1] + move_direction[1])
+                        na3 = (a3[0] + move_direction[0], a3[1] + move_direction[1])
+                        if all(self.is_valid(p) and self.is_empty(p) for p in [na1, na2, na3]):
                             new_board = copy.deepcopy(self)
                             target_set = new_board.white if player else new_board.black
-                            target_set.difference_update({p1, p2, p3})
-                            target_set.update({np1, np2, np3})
+                            target_set.difference_update({a1, a2, a3})
+                            target_set.update({na1, na2, na3})
                             all_board.append(new_board)
 
         return all_board
@@ -149,53 +149,53 @@ class Board:
         ally = self.white if player else self.black
         enemy = self.black if player else self.white
 
-        for p1 in ally:
+        for a1 in ally:
             for direction in self.direction_tuple:
-                p2 = (p1[0] + direction[0], p1[1] + direction[1])
-                if p2 not in ally:
+                a2 = (a1[0] + direction[0], a1[1] + direction[1])
+                if a2 not in ally:
                     continue  # 兩子不相連，略過
 
                 # 嘗試 push
-                target = (p2[0] + direction[0], p2[1] + direction[1])
+                e1= (a2[0] + direction[0], a2[1] + direction[1])
 
-                if target in enemy:
-                    beyond = (target[0] + direction[0], target[1] + direction[1])
+                if e1 in enemy:
+                    e2 = (e1[0] + direction[0], e1[1] + direction[1])
                     # Ally Ally Enemy Blank
-                    if self.is_valid(beyond) and self.is_empty(beyond):
+                    if self.is_valid(e2) and self.is_empty(e2):
                         new_board = copy.deepcopy(self)
                         a_set = new_board.white if player else new_board.black
                         e_set = new_board.black if player else new_board.white
 
                         # 推進
-                        a_set.remove(p1)
-                        a_set.add(target)
+                        a_set.remove(a1)
+                        a_set.add(e1)
 
-                        e_set.remove(target)
-                        e_set.add(beyond)
+                        e_set.remove(e1)
+                        e_set.add(e2)
 
                         all_board.append(new_board)
 
                     # Ally Ally Enemy X(invalid)
-                    elif not self.is_valid(beyond):
+                    elif not self.is_valid(e2):
                         # 推出場外也合法
                         new_board = copy.deepcopy(self)
                         a_set = new_board.white if player else new_board.black
                         e_set = new_board.black if player else new_board.white
 
-                        a_set.remove(p1)
-                        a_set.add(target)
+                        a_set.remove(a1)
+                        a_set.add(e1)
 
-                        e_set.remove(target)
+                        e_set.remove(e1)
 
                         all_board.append(new_board)
 
                 # Ally Ally Blank
-                elif self.is_empty(target):
+                elif self.is_empty(e1) and self.is_valid(e1):
                     new_board = copy.deepcopy(self)
                     a_set = new_board.white if player else new_board.black
 
-                    a_set.remove(p1)
-                    a_set.add(target)
+                    a_set.remove(a1)
+                    a_set.add(e1)
 
                     all_board.append(new_board)
 
@@ -206,13 +206,13 @@ class Board:
         ally = self.white if player else self.black
         enemy = self.black if player else self.white
 
-        for p1 in ally:
+        for a1 in ally:
             for direction in self.direction_tuple:
-                p2 = (p1[0] + direction[0], p1[1] + direction[1])
-                p3 = (p2[0] + direction[0], p2[1] + direction[1])
-                if p2 in ally and p3 in ally:
+                a2 = (a1[0] + direction[0], a1[1] + direction[1])
+                a3 = (a2[0] + direction[0], a2[1] + direction[1])
+                if a2 in ally and a3 in ally:
                     # 接下來就是看能不能推一或兩顆敵子
-                    e1 = (p3[0] + direction[0], p3[1] + direction[1])
+                    e1 = (a3[0] + direction[0], a3[1] + direction[1])
                     e2 = (e1[0] + direction[0], e1[1] + direction[1])
 
                     if e1 in enemy:
@@ -225,7 +225,7 @@ class Board:
                                 a_set = new_board.white if player else new_board.black
                                 e_set = new_board.black if player else new_board.white
 
-                                a_set.remove(p1)
+                                a_set.remove(a1)
                                 a_set.add(e1)
                                 e_set.remove(e1)
                                 all_board.append(new_board)
@@ -236,7 +236,7 @@ class Board:
                                 a_set = new_board.white if player else new_board.black
                                 e_set = new_board.black if player else new_board.white
 
-                                a_set.remove(p1)
+                                a_set.remove(a1)
                                 a_set.add(e1)
                                 e_set.remove(e1)
                                 e_set.add(e3)
@@ -248,7 +248,7 @@ class Board:
                                 a_set = new_board.white if player else new_board.black
                                 e_set = new_board.black if player else new_board.white
 
-                                a_set.remove(p1)
+                                a_set.remove(a1)
                                 a_set.add(e1)
                                 e_set.remove(e1)
                                 e_set.add(e2)
@@ -259,17 +259,17 @@ class Board:
                                 a_set = new_board.white if player else new_board.black
                                 e_set = new_board.black if player else new_board.white
 
-                                a_set.remove(p1)
+                                a_set.remove(a1)
                                 a_set.add(e1)
                                 e_set.remove(e1)
                                 all_board.append(new_board)
 
                     # 3 推 0
-                    elif self.is_empty(e1):
+                    elif self.is_empty(e1) and self.is_valid(e1):
                         new_board = copy.deepcopy(self)
                         a_set = new_board.white if player else new_board.black
 
-                        a_set.remove(p1)
+                        a_set.remove(a1)
                         a_set.add(e1)
                         all_board.append(new_board)
 
