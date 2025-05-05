@@ -7,4 +7,4 @@
 > 3.  Using existed initial setups to test our model’s accuracy.   
 > 4.  Generate initial setup win rate is 50/50 which evaluated by trained model.
 
-(reference previous repo)[https://github.com/altin/abalone-ai]
+[reference previous repo](https://github.com/altin/abalone-ai)
