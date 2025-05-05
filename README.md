@@ -1,6 +1,6 @@
 
 
-#### Goal: Analyze Abalone board game and find the proper initial setups 
+### Goal: Analyze Abalone board game and find the proper initial setups 
 > steps:
 > 1.  Building the enviorment of board game.  
 > 2.  Training model use Monte Carlo tree search(mcts) + reinforcement learning(RL).  
