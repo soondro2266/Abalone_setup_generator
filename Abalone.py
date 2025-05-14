@@ -71,6 +71,33 @@ class Board:
             self.all_inline_push_two_piece(player) + 
             self.all_inline_push_three_piece(player)
         )
+    
+    def all_next_move_String(self, player=True):
+        return (
+            self.convert_to_String(self.all_next_move_one_piece(player)) +
+            self.convert_to_String(self.all_next_move_two_piece(player)) +
+            self.convert_to_String(self.all_next_move_three_piece(player)) +
+            self.convert_to_String(self.all_inline_push_two_piece(player)) + 
+            self.convert_to_String(self.all_inline_push_three_piece(player))
+        )
+    
+    # convert to string + action
+    def convert_to_String(all_board: list):
+        
+
+
+    def load_from_String(self, str: str):
+        self.white = []
+        self.black = []
+
+        for i in range(len(str)):
+            # white
+            if int(str[i]) == 1:
+                self.white.append((i//9)-1, i%9)
+            #black    
+            elif int(str[i]) == 2:
+                self.black.append((i//9)-1, i%9)
+
 
     def get_perpendicular_directions(self, direction):
         idx = self.direction_tuple.index(direction)
