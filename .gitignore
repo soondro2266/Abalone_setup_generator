@@ -4,3 +4,5 @@ board.txt
 .vscode
 test
 *.exe
+gameRecord.txt
+model
