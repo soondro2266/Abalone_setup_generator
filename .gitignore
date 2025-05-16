@@ -2,3 +2,5 @@ env
 __pycache__
 board.txt
 .vscode
+gameRecord.txt
+model
