@@ -4,6 +4,11 @@
 
 using namespace std;
 
+Board::Board(){
+    n = 5;
+    white = vector<bool>(61, 1);
+}
+
 Board::Board(int size){
     n = size;
     white = vector<bool>(61, 0);
@@ -51,4 +56,13 @@ void Board::set_enemy(pair<int, int>& position){
 }
 void Board::set_empty(pair<int, int>& position){
     set(3, position.first, position.second);
+}
+
+void Board::remove_enemy(){
+    if(!player){
+        black_piece--;
+    }
+    else{
+        white_piece--;
+    }
 }

@@ -53,10 +53,13 @@ pair<int, int> operator+ (pair<int, int>& pos1, pair<int, int>& pos2);
 class AbaloneEnv
 {
 public:
+    AbaloneEnv();
 
     AbaloneEnv(int n);
 
     AbaloneEnv(Board board);
+
+    void load_board(Board board);
 
     void load_default_setup();
 
@@ -67,8 +70,8 @@ public:
 
     void show_current_board();
 
-    
-private:
+    vector<pair<int, int>> oneD_to_twoD;
+
     // functions
 
     void get_one_piece_Next(NextBoards& candidate);
@@ -77,12 +80,19 @@ private:
 
     void get_three_piece_Next(NextBoards& candidate);
 
+    int distance_to_center(pair<int, int>& position);
+
+    int population(bool player);
+
+    void visit_population(pair<int, int> position, vector<vector<bool>>& visited, bool player);
+
     bool is_empty(pair<int, int>& position);
     bool is_white(pair<int, int>& position);
     bool is_black(pair<int, int>& position);
     bool is_ally(pair<int, int>& position);
     bool is_enemy(pair<int, int>& position);
     bool is_valid(pair<int, int> position);
+
 
     // data
     int number_of_edge, number_of_place;
@@ -91,5 +101,7 @@ private:
     // mapping tool
     vector<pair<int, int>> directions;
     
-    vector<pair<int, int>> oneD_to_twoD;
+    int twoD_to_oneD(pair<int, int> position);
+
+    
 };

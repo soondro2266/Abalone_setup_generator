@@ -67,26 +67,19 @@ void AbaloneAction::load_value(int value){
     return;
 }
 
+AbaloneEnv::AbaloneEnv(){}
 
 AbaloneEnv::AbaloneEnv(int n){
     number_of_edge = n;
     currentBoard = Board(n);
     number_of_place = 3 * n * (n - 1) + 1;
     directions = {{0, 1}, {1, 1}, {1, 0}, {0, -1}, {-1, -1}, {-1, 0}};
-    int cnt = 0;
     //consturct oneD-to-twoD
     for(int i = 0; i < 2*n-1; i++){
         for(int j = 0; j < 2*n-1; j++){
-            int result;
-            if(i < n){
-                result = i*(2*n + i - 1)/2 + j;
-            }
-            else{
-                result = 3*n*i - i*(i+5)/2 - n*(n-2) + j - 1;
-            }
-            if(is_valid(make_pair(i, j))){
-                oneD_to_twoD.push_back(make_pair(i, j));
-                cnt++;
+            pair<int, int> position = make_pair(i, j);
+            if(is_valid(position)){
+                oneD_to_twoD.push_back(position);
             }
         }
     }
@@ -102,19 +95,16 @@ AbaloneEnv::AbaloneEnv(Board board){
     //consturct oneD-to-twoD
     for(int i = 0; i < 2*n-1; i++){
         for(int j = 0; j < 2*n-1; j++){
-            int result;
-            if(i < n){
-                result = i*(2*n + i - 1)/2 + j;
-            }
-            else{
-                result = 3*n*i - i*(i+5)/2 - n*(n-2) + j - 1;
-            }
-            if(is_valid(make_pair(i, j))){
-                oneD_to_twoD.push_back(make_pair(i, j));
-                cnt++;
+            pair<int, int> position = make_pair(i, j);
+            if(is_valid(position)){
+                oneD_to_twoD.push_back(position);
             }
         }
     }
+}
+
+void AbaloneEnv::load_board(Board board){
+    currentBoard = board;
 }
 
 void AbaloneEnv::load_default_setup(){
@@ -127,6 +117,8 @@ void AbaloneEnv::load_default_setup(){
     for(int oneDpos : defaultBlack){
         currentBoard.set(2, oneD_to_twoD[oneDpos].first, oneD_to_twoD[oneDpos].second);
     }
+    currentBoard.white_piece = defaultWhite.size();
+    currentBoard.black_piece = defaultBlack.size();
 }
 
 
@@ -246,6 +238,7 @@ void AbaloneEnv::get_two_piece_Next(NextBoards& candidate){
                             Board nextBoard = currentBoard;
                             nextBoard.set_empty(position);
                             nextBoard.set_ally(target);
+                            nextBoard.remove_enemy();
                             nextBoard.player = !(nextBoard.player);
                             candidate.push_back(make_pair(nextBoard, action.value()));
                         }
@@ -308,6 +301,7 @@ void AbaloneEnv::get_three_piece_Next(NextBoards& candidate){
                             Board nextBoard = currentBoard;
                             nextBoard.set_empty(position);
                             nextBoard.set_ally(target);
+                            nextBoard.remove_enemy();
                             nextBoard.player = !(nextBoard.player);
                             candidate.push_back(make_pair(nextBoard, action.value()));
                         }
@@ -325,6 +319,7 @@ void AbaloneEnv::get_three_piece_Next(NextBoards& candidate){
                                 Board nextBoard = currentBoard;
                                 nextBoard.set_empty(position);
                                 nextBoard.set_ally(target);
+                                nextBoard.remove_enemy();
                                 nextBoard.player = !(nextBoard.player);
                                 candidate.push_back(make_pair(nextBoard, action.value()));
                             }
@@ -384,4 +379,65 @@ bool AbaloneEnv::is_valid(pair<int, int> position){
         return false;
     }
     return true;
+}
+
+int AbaloneEnv::distance_to_center(pair<int, int>& position){
+    int y = position.first-position.second;
+    return max(abs(position.first - number_of_edge + 1),max(abs(y), abs(position.second - number_of_edge + 1)));
+}
+
+int AbaloneEnv::population(bool player){
+    vector<vector<bool>> visited = vector(2*number_of_edge-1, vector(2*number_of_edge-1, false));
+    int result = 0;
+    if(!player){
+        for(int oneDpos = 0; oneDpos < number_of_place; oneDpos++){
+            pair<int, int> position = oneD_to_twoD[oneDpos];
+            if(currentBoard.white[oneDpos] == 1 && !visited[position.first][position.second]){
+                visit_population(position, visited, player);
+                result++;
+            }
+        }
+    }
+    else{
+        for(int oneDpos = 0; oneDpos < number_of_place; oneDpos++){
+            pair<int, int> position = oneD_to_twoD[oneDpos];
+            if(currentBoard.black[oneDpos] == 1 && !visited[position.first][position.second]){
+                visit_population(position, visited, player);
+                result++;
+            }
+        }
+    }
+    return result;
+}
+
+void AbaloneEnv::visit_population(pair<int, int> position, vector<vector<bool>>& visited, bool player){
+    visited[position.first][position.second] = true;
+    for(int direction = 0; direction < 6; direction++){
+        pair<int, int>neighbor = position + directions[direction];
+        if(!player){
+            if(is_white(neighbor) && !visited[neighbor.first][neighbor.second]){
+                visit_population(neighbor, visited, player);
+            }
+        }
+        else{
+            if(is_black(neighbor) && !visited[neighbor.first][neighbor.second]){
+                visit_population(neighbor, visited, player);
+            }
+        }
+    }
+    return;
+}
+
+int AbaloneEnv::twoD_to_oneD(pair<int, int> position){
+    int result;
+    int n = number_of_edge;
+    int i = position.first;
+    int j = position.second;
+    if(i < n){
+        result = i*(2*n + i - 1)/2 + j;
+    }
+    else{
+        result = 3*n*i - i*(i+5)/2 - n*(n-2) + j - 1;
+    }
+    return result;
 }

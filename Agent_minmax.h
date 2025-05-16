@@ -1,37 +1,33 @@
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
+#include <limits> 
 #include <string>
+#include <cmath>
+#include "AbaloneEnv.h"
+#include "Board.h"
+#pragma once
+
 using namespace std;
-
-/*
-class Tree
-{
-public:
-	int depth;
-	
-	Minimax* parent_node; //應該是只有一個parent node
-	Tree(int depth, vector<bool> initial_white_state, vector<bool> initial_black_state);
-	Tree();
-	~Tree();
-
-};
-*/
 
 
 class Minimax
 {
-public:
-	int depth;
-	vector<bool> white_state;
-	vector<bool> black_state;
-	vector<string> action;
+    public:
+    Minimax(){}
 
-	Minimax(int depth, vector<bool> white_state, vector<bool> black_state);
-	Minimax();
-	~Minimax();
+    Minimax(int n);
 
-	int heuristic(vector<bool> white_state, vector<bool> black_state, int depth);
-	int alphabeta(vector<bool> white_state, vector<bool> black_state, int depth, bool maximizingPlayer, int alpha, int beta);
+    void start(Board initial_state, int max_depth, int max_round, string path = "minmax_result.txt");
+
+
+    long double alphabeta(Board& current_state, int depth, bool maximizingPlayer, long double alpha, long double beta);
+
+    pair<Board, int> find_best_action(AbaloneEnv& game);
+    
+    long double heuristic(AbaloneEnv& state);
+
+private:
+    int max_depth;
 };
-

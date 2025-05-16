@@ -14,7 +14,7 @@ public:
      * `true` :player is black
      */
     bool player;
-    Board(){}
+    Board();
     /**
     * @brief Constructs a Board of given size, initializing all positions to empty.
     *
@@ -45,9 +45,10 @@ public:
     void set_ally(pair<int, int>& position);
     void set_enemy(pair<int, int>& position);
     void set_empty(pair<int, int>& position);
+    void remove_enemy();
     int n;
-private:
-    
+    int white_piece;
+    int black_piece;
     vector<bool> white;
     vector<bool> black;
 };
