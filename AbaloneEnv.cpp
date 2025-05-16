@@ -1,199 +1,387 @@
+#include <iostream>
 #include <vector>
 #include <map>
+#include "Board.h"
+#include "AbaloneEnv.h"
 #define toWhite 1
 #define toBlack 2
 #define toEmpty 3
-#define NextBoards vector<pair<pair<vector<bool>, vector<bool>>, int>>
+#define NextBoards vector<pair<Board,int>>
 
 using namespace std;
 
-pair<int, int>& operator + (pair<int, int>& pos1, pair<int, int>& pos2){
-    pair<int, int> result = {pos1.first + pos2.first, pos1.second + pos2.second};
-    return result;
+pair<int, int> operator+ (pair<int, int>& pos1, pair<int, int>& pos2){
+    return make_pair(pos1.first + pos2.first, pos1.second + pos2.second);
+}
+
+void AbaloneAction::set_type(){
+    type = 0;
+    if(numberofpiece != 1){
+        type = 3 * numberofpiece - 4 + direction.second;
+    }
+}
+void AbaloneAction::load_type(){
+    switch (type)
+    {
+    case 0:
+        numberofpiece = 0;
+        direction.second = 0;
+        break;
+    case 1:
+        numberofpiece = 2;
+        direction.second = -1;
+        break;
+    case 2:
+        numberofpiece = 2;
+        direction.second = 0;
+        break;
+    case 3:
+        numberofpiece = 2;
+        direction.second = 1;
+        break;
+    case 4:
+        numberofpiece = 3;
+        direction.second = -1;
+        break;
+    case 5:
+        numberofpiece = 3;
+        direction.second = 0;
+        break;
+    case 6:
+        numberofpiece = 3;
+        direction.second = 1;
+        break;
+    }
+    return;
+}
+int AbaloneAction::value(){
+    set_type();
+    return oneDpos*42+type*6+direction.first;
+}
+void AbaloneAction::load_value(int value){
+    oneDpos = value/42;
+    value %= 42;
+    type = value/6;
+    direction.first = value%6;
+    load_type();
+    return;
 }
 
 
-class Board
-{
-public:
-    Board(){
-        white = vector<bool>(61, 0);
-        black = vector<bool>(61, 0);
-    }
-
-    auto get() -> pair<vector<bool>, vector<bool>>&{
-        pair<vector<bool>, vector<bool>> board({white, black});
-        return board;
-    }
-    void set(int state, int oneD_pos){
-        switch(state){
-            case 1:
-                white[oneD_pos] = 1;
-                break;
-            case 2:
-                black[oneD_pos] = 1;
-                break;
-            case 3:
-                white[oneD_pos] = 0;
-                black[oneD_pos] = 0;
-                break;
+AbaloneEnv::AbaloneEnv(int n){
+    number_of_edge = n;
+    currentBoard = Board(n);
+    number_of_place = 3 * n * (n - 1) + 1;
+    directions = {{0, 1}, {1, 1}, {1, 0}, {0, -1}, {-1, -1}, {-1, 0}};
+    int cnt = 0;
+    //consturct oneD-to-twoD
+    for(int i = 0; i < 2*n-1; i++){
+        for(int j = 0; j < 2*n-1; j++){
+            int result;
+            if(i < n){
+                result = i*(2*n + i - 1)/2 + j;
+            }
+            else{
+                result = 3*n*i - i*(i+5)/2 - n*(n-2) + j - 1;
+            }
+            if(is_valid(make_pair(i, j))){
+                oneD_to_twoD.push_back(make_pair(i, j));
+                cnt++;
+            }
         }
     }
-    void show(){
+}
 
-    }
-
-    bool is_empty(int oneD_pos){
-        return white[oneD_pos] == 0 && black[oneD_pos] == 0;
-    }
-    bool is_white(int oneD_pos){
-        return white[oneD_pos] == 1;
-    }
-    bool is_black(int oneD_pos){
-        return black[oneD_pos] == 1;
-    }
-    bool is_valid(int x, int y, map<pair<int, int>, int>& mapping){
-        return mapping.find({x, y}) != mapping.end();
-    }
-
-    auto get_current_board() -> pair<vector<bool>, vector<bool>>{
-        return make_pair(white, black);
-    }
-
-private:
-    vector<bool> white;
-    vector<bool> black;
-};
-
-class AbaloneEnv
-{
-public:
-    AbaloneEnv(){}
-
-    void load_default_setup(){
-        vector<int> defaultWhite = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15};
-        vector<int> defaultBlack = {56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47};
-        for(int oneD_pos : defaultWhite){
-            currentBoard.set(toWhite, oneD_pos);
-        }
-        for(int oneD_pos : defaultWhite){
-            currentBoard.set(toBlack, oneD_pos);
+AbaloneEnv::AbaloneEnv(Board board){
+    currentBoard = board;
+    int n = board.n;
+    number_of_edge = n;
+    number_of_place = 3 * n * (n - 1) + 1;
+    directions = {{0, 1}, {1, 1}, {1, 0}, {0, -1}, {-1, -1}, {-1, 0}};
+    int cnt = 0;
+    //consturct oneD-to-twoD
+    for(int i = 0; i < 2*n-1; i++){
+        for(int j = 0; j < 2*n-1; j++){
+            int result;
+            if(i < n){
+                result = i*(2*n + i - 1)/2 + j;
+            }
+            else{
+                result = 3*n*i - i*(i+5)/2 - n*(n-2) + j - 1;
+            }
+            if(is_valid(make_pair(i, j))){
+                oneD_to_twoD.push_back(make_pair(i, j));
+                cnt++;
+            }
         }
     }
+}
 
-    // implement later
-    void load_customize_setup(){
-
+void AbaloneEnv::load_default_setup(){
+    vector<int> defaultWhite = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15};
+    vector<int> defaultBlack = {56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47, 59, 60};
+    currentBoard = Board(number_of_edge);
+    for(int oneDpos : defaultWhite){
+        currentBoard.set(1, oneD_to_twoD[oneDpos].first, oneD_to_twoD[oneDpos].second);
     }
-
-    auto get_all_next_boards() -> NextBoards&{
-
+    for(int oneDpos : defaultBlack){
+        currentBoard.set(2, oneD_to_twoD[oneDpos].first, oneD_to_twoD[oneDpos].second);
     }
+}
 
 
-    void show_current_board(){
+void AbaloneEnv::load_customize_setup(){
 
+}
+
+auto AbaloneEnv::get_all_next_boards() -> NextBoards{
+    NextBoards candidate;
+    get_one_piece_Next(candidate);
+    get_two_piece_Next(candidate);
+    get_three_piece_Next(candidate);
+    return candidate;
+}
+
+
+void AbaloneEnv::show_current_board(){
+    vector<vector<int>> mask = vector(2 * number_of_edge - 1,vector(4 * number_of_edge - 1, 0));
+    for(int i = 0; i < 2*number_of_edge - 1; i++){
+        for(int j = 0; j < 2*number_of_edge - 1; j++){
+            pair<int, int> position = make_pair(i, j);
+            if(!is_valid(position))continue;
+            int mask_j;
+            if(i < number_of_edge){
+                mask_j = abs(number_of_edge - i - 1) + 2 * j;
+            }
+            else{
+                mask_j = abs(number_of_edge - i - 1) + 2 * (j - i + number_of_edge - 1);
+            }
+            if(is_white(position)){
+                mask[i][mask_j] = 1;
+            }
+            else if(is_black(position)){
+                mask[i][mask_j] = 2;
+            }
+            else{
+                mask[i][mask_j] = 3;
+            }
+        }
     }
-
-
-    
-private:
-    // functions 
-    auto get_perpendicular(const pair<int, int>& direction) -> pair<pair<int, int>, pair<int, int>>& {
-        int idx = 0;
-        while(this->directions[idx] != direction) idx++;
-        pair<pair<int, int>, pair<int, int>> perpDirections = {
-            this->directions[(idx+2)%6], this->directions[(idx-2)%6]
-        };
-        return perpDirections;
+    for(int i = 0; i < 2 * number_of_edge - 1; i++){
+        for(int j = 0; j < 4 * number_of_edge - 1; j++){
+            if(mask[i][j] == 1){
+                cout << "W";
+            }
+            else if(mask[i][j] == 2){
+                cout << "B";
+            }
+            else if(mask[i][j] == 3){
+                cout << ".";
+            }
+            else{
+                cout << " ";
+            }
+        }
+        cout << endl;
     }
+}
 
-    auto get_one_piece_Next()-> NextBoards&{
-        NextBoards next_boards;
-        for(int oneD_pos = 0; oneD_pos < 61; oneD_pos++){
-            pair<int, int> twoD_pos = mappingInverse[oneD_pos];
-            if(currentBoard.is_white(oneD_pos)){
-                for(int i = 0; i < 6; i++){
-                    int nextPos = mapping[twoD_pos + directions[i]];
-                    if(currentBoard.is_empty(nextPos)){
-                        auto current_board = currentBoard.get_current_board();
-                        current_board.first[nextPos] = 1;
-                        current_board.first[oneD_pos] = 0;
-                        next_boards.push_back(make_pair(current_board, action_id(1, i, oneD_pos)));
+
+void AbaloneEnv::get_one_piece_Next(NextBoards& candidate){
+    AbaloneAction action;
+    action.numberofpiece = 1;
+    action.direction.second = 0;
+    for(int oneD_pos = 0; oneD_pos < number_of_place; oneD_pos++){
+        pair<int, int> position = oneD_to_twoD[oneD_pos];
+        if(!is_ally(position)) continue;
+        action.oneDpos = oneD_pos;
+        for(int direction = 0; direction < 6; direction++){
+            action.direction.first = direction;
+            pair<int, int> nextPos = position + directions[direction];
+            if(is_empty(nextPos)){
+                Board nextBoard = currentBoard;
+                nextBoard.set_empty(position);
+                nextBoard.set_ally(nextPos);
+                nextBoard.player = !(nextBoard.player);
+                candidate.push_back(make_pair((nextBoard), action.value()));
+            }
+        }
+    }
+    return;
+}
+
+void AbaloneEnv::get_two_piece_Next(NextBoards& candidate){
+    AbaloneAction action;
+    action.numberofpiece = 2;
+    for(int oneD_pos = 0; oneD_pos < number_of_place; oneD_pos++){
+        pair<int, int> position = oneD_to_twoD[oneD_pos];
+        if(!is_ally(position)) continue;
+        action.oneDpos = oneD_pos;
+        for(int direction = 0; direction < 6; direction++){
+            pair<int, int> position2 = position + directions[direction];
+            if(!is_ally(position2)) continue;
+            action.direction.first = direction;
+            for(int second_direction = -1; second_direction <= 1; second_direction++){
+                action.direction.second = second_direction;
+                if(second_direction == 0){ //regular push
+                    pair<int, int> target = position2 + directions[direction];
+                    if(is_empty(target)){ // no enemy
+                        Board nextBoard = currentBoard;
+                        nextBoard.set_empty(position);
+                        nextBoard.set_ally(target);
+                        nextBoard.player = !(nextBoard.player);
+                        candidate.push_back(make_pair(nextBoard, action.value()));
+                    }
+                    else if(is_enemy(target)){ //2 push 1
+                        pair<int, int> target2 = target + directions[direction];
+                        if(is_empty(target2)){ //push to empty
+                            Board nextBoard = currentBoard;
+                            nextBoard.set_empty(position);
+                            nextBoard.set_ally(target);
+                            nextBoard.set_enemy(target2);
+                            nextBoard.player = !(nextBoard.player);
+                            candidate.push_back(make_pair(nextBoard, action.value()));
+                        }
+                        else if(!is_valid(target2)){ //push to void
+                            Board nextBoard = currentBoard;
+                            nextBoard.set_empty(position);
+                            nextBoard.set_ally(target);
+                            nextBoard.player = !(nextBoard.player);
+                            candidate.push_back(make_pair(nextBoard, action.value()));
+                        }
                     }
                 }
-            }
-            else if(currentBoard.is_black(oneD_pos)){
-                for(int i = 0; i < 6; i++){
-                    int nextPos = mapping[twoD_pos + directions[i]];
-                    if(currentBoard.is_empty(nextPos)){
-                        auto current_board = currentBoard.get_current_board();
-                        current_board.second[nextPos] = 1;
-                        current_board.second[oneD_pos] = 0;
-                        next_boards.push_back(make_pair(current_board, action_id(1, i, oneD_pos)));
-                    }
+                else{//side move
+                    int move_direction = (direction + second_direction) % 6;
+                    pair<int, int> target1 = position + directions[move_direction];
+                    pair<int, int> target2 = position2 + directions[move_direction];
+                    if(!(is_empty(target1) && is_empty(target2))) continue;
+                    Board nextBoard = currentBoard;
+                    nextBoard.set_empty(position);
+                    nextBoard.set_empty(position2);
+                    nextBoard.set_ally(target1);
+                    nextBoard.set_ally(target2);
+                    nextBoard.player = !(nextBoard.player);
+                    candidate.push_back(make_pair(nextBoard, action.value()));
                 }
             }
         }
-        return next_boards;
     }
+    return;
+}
 
-    auto get_two_piece_Next()-> vector<pair<vector<bool>, vector<bool>>>&{
-        vector<pair<vector<bool>, vector<bool>>> next_boards;
-        for(int oneD_pos = 0; oneD_pos < 61; oneD_pos++){
-            pair<int, int> twoD_pos = mappingInverse[oneD_pos];
-
-        }   
-    }
-
-    auto get_three_piece_Next(){
-
-    }
-
-    int action_id(int num_of_piece, int directionIdx){
-        if(num_of_piece == 1){
-            return directionIdx;
-        }
-        else if(num_of_piece == 2){
-            switch(directionIdx){
-                
+void AbaloneEnv::get_three_piece_Next(NextBoards& candidate){
+    AbaloneAction action;
+    action.numberofpiece = 3;
+    for(int oneD_pos = 0; oneD_pos < number_of_place; oneD_pos++){
+        pair<int, int> position = oneD_to_twoD[oneD_pos];
+        if(!is_ally(position)) continue;
+        action.oneDpos = oneD_pos;
+        for(int direction = 0; direction < 6; direction++){
+            pair<int, int> position2 = position + directions[direction];
+            if(!is_ally(position2)) continue;
+            pair<int, int> position3 = position2 + directions[direction];
+            if(!is_ally(position3)) continue;
+            action.direction.first = direction;
+            for(int second_direction = -1; second_direction <= 1; second_direction++){
+                action.direction.second = second_direction;
+                if(second_direction == 0){ //regular push
+                    pair<int, int> target = position3 + directions[direction];
+                    if(is_empty(target)){ // no enemy
+                        Board nextBoard = currentBoard;
+                        nextBoard.set_empty(position);
+                        nextBoard.set_ally(target);
+                        nextBoard.player = !(nextBoard.player);
+                        candidate.push_back(make_pair(nextBoard, action.value()));
+                    }
+                    else if(is_enemy(target)){
+                        pair<int, int> target2 = target + directions[direction];
+                        if(is_empty(target2)){ //3 push 1 to empty
+                            Board nextBoard = currentBoard;
+                            nextBoard.set_empty(position);
+                            nextBoard.set_ally(target);
+                            nextBoard.set_enemy(target2);
+                            nextBoard.player = !(nextBoard.player);
+                            candidate.push_back(make_pair(nextBoard, action.value()));
+                        }
+                        else if(!is_valid(target2)){ //3 push 1 to void
+                            Board nextBoard = currentBoard;
+                            nextBoard.set_empty(position);
+                            nextBoard.set_ally(target);
+                            nextBoard.player = !(nextBoard.player);
+                            candidate.push_back(make_pair(nextBoard, action.value()));
+                        }
+                        else if(is_enemy(target2)){
+                            pair<int, int> target3 = target2 + directions[direction];
+                            if(is_empty(target3)){ //3 push 2 to empty
+                                Board nextBoard = currentBoard;
+                                nextBoard.set_empty(position);
+                                nextBoard.set_ally(target);
+                                nextBoard.set_enemy(target3);
+                                nextBoard.player = !(nextBoard.player);
+                                candidate.push_back(make_pair(nextBoard, action.value()));
+                            }
+                            else if(!is_valid(target3)){ // 3 push 2 to void
+                                Board nextBoard = currentBoard;
+                                nextBoard.set_empty(position);
+                                nextBoard.set_ally(target);
+                                nextBoard.player = !(nextBoard.player);
+                                candidate.push_back(make_pair(nextBoard, action.value()));
+                            }
+                        }
+                    }
+                }
+                else{//side move
+                    int move_direction = (direction + second_direction) % 6;
+                    pair<int, int> target1 = position + directions[move_direction];
+                    pair<int, int> target2 = position2 + directions[move_direction];
+                    pair<int, int> target3 = position3 + directions[move_direction];
+                    if(!(is_empty(target1) && is_empty(target2) && is_empty(target3))) continue;
+                    Board nextBoard = currentBoard;
+                    nextBoard.set_empty(position);
+                    nextBoard.set_empty(position2);
+                    nextBoard.set_empty(position3);
+                    nextBoard.set_ally(target1);
+                    nextBoard.set_ally(target2);
+                    nextBoard.set_ally(target3);
+                    nextBoard.player = !(nextBoard.player);
+                    candidate.push_back(make_pair(nextBoard, action.value()));
+                }
             }
         }
-        else if(num_of_piece == 3){
-            switch(directionIdx){
-
-            }
-        }
     }
+    return;
+}
 
-    // data
-    Board currentBoard;
-    vector<pair<vector<bool>&, vector<bool>&>> allNextBoards;
-
-    // mapping tool
-    vector<pair<int, int>> directions = {
-        {0, 1}, {1, 1}, {1, 0}, {0, -1}, {-1, -1}, {-1, 0}
-    };
-    map<pair<int, int>, int> mapping = {
-        {{0, 0},  0}, {{0, 1},  1}, {{0, 2},  2}, {{0, 3},  3}, {{0, 4},  4},
-        {{1, 0},  5}, {{1, 1},  6}, {{1, 2},  7}, {{1, 3},  8}, {{1, 4},  9}, {{1, 5}, 10},
-        {{2, 0}, 11}, {{2, 1}, 12}, {{2, 2}, 13}, {{2, 3}, 14}, {{2, 4}, 15}, {{2, 5}, 16}, {{2, 6}, 17},
-        {{3, 0}, 18}, {{3, 1}, 19}, {{3, 2}, 20}, {{3, 3}, 21}, {{3, 4}, 22}, {{3, 5}, 23}, {{3, 6}, 24}, {{3, 7}, 25},
-        {{4, 0}, 26}, {{4, 1}, 27}, {{4, 2}, 28}, {{4, 3}, 29}, {{4, 4}, 30}, {{4, 5}, 31}, {{4, 6}, 32}, {{4, 7}, 33}, {{4, 8}, 34},
-        {{5, 1}, 35}, {{5, 2}, 36}, {{5, 3}, 37}, {{5, 4}, 38}, {{5, 5}, 39}, {{5, 6}, 40}, {{5, 7}, 41}, {{5, 8}, 42},
-        {{6, 2}, 43}, {{6, 3}, 44}, {{6, 4}, 45}, {{6, 5}, 46}, {{6, 6}, 47}, {{6, 7}, 48}, {{6, 8}, 49},
-        {{7, 3}, 50}, {{7, 4}, 51}, {{7, 5}, 52}, {{7, 6}, 53}, {{7, 7}, 54}, {{7, 8}, 55},
-        {{8, 4}, 56}, {{8, 5}, 57}, {{8, 6}, 58}, {{8, 7}, 59}, {{8, 8}, 60},
-    };
-    map<int, pair<int, int>> mappingInverse = {
-        {0, {0, 0}}, {1, {0, 1}}, {2, {0, 2}}, {3, {0, 3}}, {4, {0, 4}},
-        {5, {1, 0}}, {6, {1, 1}}, {7, {1, 2}}, {8, {1, 3}}, {9, {1, 4}}, {10, {1, 5}},
-        {11, {2, 0}}, {12, {2, 1}}, {13, {2, 2}}, {14, {2, 3}}, {15, {2, 4}}, {16, {2, 5}}, {17, {2, 6}},
-        {18, {3, 0}}, {19, {3, 1}}, {20, {3, 2}}, {21, {3, 3}}, {22, {3, 4}}, {23, {3, 5}}, {24, {3, 6}}, {25, {3, 7}},
-        {26, {4, 0}}, {27, {4, 1}}, {28, {4, 2}}, {29, {4, 3}}, {30, {4, 4}}, {31, {4, 5}}, {32, {4, 6}}, {33, {4, 7}}, {34, {4, 8}},
-        {35, {5, 1}}, {36, {5, 2}}, {37, {5, 3}}, {38, {5, 4}}, {39, {5, 5}}, {40, {5, 6}}, {41, {5, 7}}, {42, {5, 8}},
-        {43, {6, 2}}, {44, {6, 3}}, {45, {6, 4}}, {46, {6, 5}}, {47, {6, 6}}, {48, {6, 7}}, {49, {6, 8}},
-        {50, {7, 3}}, {51, {7, 4}}, {52, {7, 5}}, {53, {7, 6}}, {54, {7, 7}}, {55, {7, 8}},
-        {56, {8, 4}}, {57, {8, 5}}, {58, {8, 6}}, {59, {8, 7}}, {60, {8, 8}}
-    };
-};
+bool AbaloneEnv::is_empty(pair<int, int>& position){
+    if(!is_valid(position))return false;
+    auto result = currentBoard.get(position.first, position.second);
+    return result.first == 0 && result.second == 0;
+}
+bool AbaloneEnv::is_white(pair<int, int>& position){
+    if(!is_valid(position))return false;
+    auto result = currentBoard.get(position.first, position.second);
+    return result.first == 1;
+}
+bool AbaloneEnv::is_black(pair<int, int>& position){
+    if(!is_valid(position))return false;
+    auto result = currentBoard.get(position.first, position.second);
+    return result.second == 1;
+}
+bool AbaloneEnv::is_ally(pair<int, int>& position){
+    return currentBoard.player ? is_black(position) : is_white(position);
+}
+bool AbaloneEnv::is_enemy(pair<int, int>& position){
+    return currentBoard.player ? is_white(position) : is_black(position);
+}
+bool AbaloneEnv::is_valid(pair<int, int> position){
+    if(position.first  < 0 || 
+        position.second < 0 ||
+        position.first  >= 2 * number_of_edge - 1 ||
+        position.second >= 2 * number_of_edge - 1 ||
+        position.first - position.second >=  number_of_edge ||
+        position.first - position.second <= -number_of_edge){
+        return false;
+    }
+    return true;
+}
