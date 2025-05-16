@@ -26,8 +26,10 @@ def behavior_cloning():
 
 # self playing (not done yet)
 def RL_policyNetwork():
-    policyNetwork = load_model('./model/policyNetwork_pretrain.pth')
-    policyNetwork.train()
+    player = load_model('./model/policyNetwork_pretrain.pth')
+    opponent = player
+    player.train()
+    opponent.eval()
 
 if __name__ == '__main__':
     behavior_cloning()
