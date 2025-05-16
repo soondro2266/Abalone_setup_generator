@@ -11,8 +11,7 @@ using namespace std;
 class Client
 {
 public:
-    Client(){}
-    Client(const char* host = "127.0.0.1", int port = 9000){
+    void connect_to(const char* host = "127.0.0.1", int port = 9000){
         // AF_INET: IPv4, SOCK_STREAM: TCP
         sock = socket(AF_INET, SOCK_STREAM, 0);
         // set server address at `host` `port`
@@ -23,8 +22,7 @@ public:
         // connect to python server
         connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     }
-    ~Client(){
-        // close the connection
+    void disconnect(){
         close(sock);
     }
     // you may want to change how data is exchange
