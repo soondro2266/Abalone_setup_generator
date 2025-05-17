@@ -245,7 +245,8 @@ void AbaloneEnv::get_two_piece_Next(NextBoards& candidate){
                     }
                 }
                 else{//side move
-                    int move_direction = (direction + second_direction) % 6;
+                    int move_direction = (direction + second_direction + 6) % 6;
+                    //cout << move_direction << "\n";
                     pair<int, int> target1 = position + directions[move_direction];
                     pair<int, int> target2 = position2 + directions[move_direction];
                     if(!(is_empty(target1) && is_empty(target2))) continue;
@@ -327,7 +328,7 @@ void AbaloneEnv::get_three_piece_Next(NextBoards& candidate){
                     }
                 }
                 else{//side move
-                    int move_direction = (direction + second_direction) % 6;
+                    int move_direction = (direction + second_direction + 6) % 6;
                     pair<int, int> target1 = position + directions[move_direction];
                     pair<int, int> target2 = position2 + directions[move_direction];
                     pair<int, int> target3 = position3 + directions[move_direction];

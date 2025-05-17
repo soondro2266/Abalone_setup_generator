@@ -9,13 +9,14 @@ using namespace std;
 int main(){
 
     AbaloneEnv game(5);
+
     game.load_default_setup();
 
     int dep, round;
     cout << "Enter Minmax max depth:" << endl;
     cin >> dep;
     cout << "Enter Minmax round:" << endl;
-    cin >> round;
+    cin >> round; 
     Minimax minmax;
 
     minmax.start(game.currentBoard, dep, round);
