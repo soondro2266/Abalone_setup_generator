@@ -442,3 +442,34 @@ int AbaloneEnv::twoD_to_oneD(pair<int, int> position){
     }
     return result;
 }
+
+
+int AbaloneEnv::count_neighbors(pair<int, int> pos, bool isWhite){
+    int neighbor = 0;
+    if(isWhite){
+        for(auto direction : directions){
+            auto pos_ = pos + direction;
+            if(is_white(pos_)){
+                neighbor++;
+            }
+        }
+    }
+    else{
+        for(auto direction : directions){
+            auto pos_ = pos + direction;
+            if(is_black(pos_)){
+                neighbor++;
+            }
+        }
+    }
+    return neighbor;
+}
+
+int AbaloneEnv::distance_to_edge(pair<int,int> pos){
+    int n = this->number_of_edge;
+    return n-1-distance_to_center(pos);
+}
+
+bool AbaloneEnv::can_push(int idx){
+    return false;
+}

@@ -93,6 +93,9 @@ public:
     bool is_enemy(pair<int, int>& position);
     bool is_valid(pair<int, int> position);
 
+    int count_neighbors(pair<int, int> pos, bool is_white);
+    bool can_push(int idx);
+    int distance_to_edge(pair<int,int> pos); 
 
     // data
     int number_of_edge, number_of_place;
