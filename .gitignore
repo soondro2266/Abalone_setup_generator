@@ -8,4 +8,4 @@ gameRecord.txt
 model
 SomeLocalDir
 SomeLocalDir1
-.txt
+*.txt
