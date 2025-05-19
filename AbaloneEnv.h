@@ -64,7 +64,7 @@ public:
     void load_default_setup();
 
     // implement later
-    void load_customize_setup();
+    void load_customize_setup(vector<int> white_setup, vector<int> black_setup);
 
     auto get_all_next_boards() -> NextBoards;
 

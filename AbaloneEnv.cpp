@@ -107,6 +107,18 @@ void AbaloneEnv::load_board(Board board){
     currentBoard = board;
 }
 
+void AbaloneEnv::load_customize_setup(vector<int> white_setup, vector<int> black_setup){
+    currentBoard = Board(number_of_edge);
+    for(int oneDpos : white_setup){
+        currentBoard.set(1, oneD_to_twoD[oneDpos].first, oneD_to_twoD[oneDpos].second);
+    }
+    for(int oneDpos : black_setup){
+        currentBoard.set(2, oneD_to_twoD[oneDpos].first, oneD_to_twoD[oneDpos].second);
+    }
+    currentBoard.white_piece = white_setup.size();
+    currentBoard.black_piece = black_setup.size();
+}
+
 void AbaloneEnv::load_default_setup(){
     vector<int> defaultWhite = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15};
     vector<int> defaultBlack = {56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47, 59, 60};
@@ -119,11 +131,6 @@ void AbaloneEnv::load_default_setup(){
     }
     currentBoard.white_piece = defaultWhite.size();
     currentBoard.black_piece = defaultBlack.size();
-}
-
-
-void AbaloneEnv::load_customize_setup(){
-
 }
 
 auto AbaloneEnv::get_all_next_boards() -> NextBoards{

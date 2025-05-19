@@ -47,7 +47,7 @@ void Minimax::start(Board initial_state, int max_depth, int max_round, string pa
 pair<Board, int> Minimax::find_best_action(AbaloneEnv& game){
     pair<Board, int> best_move;
     vector<pair<Board, int>> all_moves = game.get_all_next_boards();
-    if(game.currentBoard.player){ // white move first
+    if(!game.currentBoard.player){ // white move first
         long double max_eval = MIN;
         for(auto move : all_moves){
             long double eval = alphabeta(move.first, 1, !game.currentBoard.player, MIN, MAX);
@@ -79,14 +79,17 @@ long double Minimax::alphabeta(Board& current_state, int depth, bool maximizingP
     AbaloneEnv current_game = AbaloneEnv(current_state);
 
     if (depth == max_depth || current_state.black_piece <= 8 || current_state.white_piece <= 8) {
-        return heuristic(current_game);
+        long double result = heuristic(current_game);
+        //current_game.show_current_board();
+        //cout << result << endl;
+        return result;
     }
     vector<pair<Board, int>> all_next_move = current_game.get_all_next_boards();
     pair<Board, int> best_move;
 
     
 
-    if (maximizingPlayer) {
+    if (!maximizingPlayer) {
         long double maxEval = MIN;      
         for (auto next_move : all_next_move) {
             long double eval = alphabeta(next_move.first , depth + 1, !maximizingPlayer, alpha, beta);
@@ -121,39 +124,6 @@ long double Minimax::alphabeta(Board& current_state, int depth, bool maximizingP
         return minEval;
     }
 }
-/*
-long double Minimax::heuristic(AbaloneEnv& state){
-
-    int pieces_of_white = 0;
-    int pieces_of_black = 0;
-    int distance_of_white = 0;
-    int distance_of_black = 0;
-    for(int oneDpos = 0; oneDpos < state.number_of_place; oneDpos++){
-        pair<int, int> position = state.oneD_to_twoD[oneDpos];
-        if(state.currentBoard.white[oneDpos]){
-            distance_of_white += state.distance_to_center(position);
-            pieces_of_white++;
-        }
-        if(state.currentBoard.black[oneDpos]){
-            distance_of_black += state.distance_to_center(position);
-            pieces_of_black++;
-        }
-    }
-    long double h1 = (long double)distance_of_black/pieces_of_black - (long double)distance_of_white/pieces_of_white;
-
-    long double h2 = 0;
-    if(fabs(h1) > 2){
-        h2 = state.population(true) - state.population(false);
-    }
-    
-    int h3 = 0;
-    if(fabs(h1) < 1.8){
-        h3 = (pieces_of_white - pieces_of_black)* 100;
-    }
-    
-    return h1 + h2 + h3;
-}
-    */
 
 long double Minimax::heuristic(AbaloneEnv& state) {
     int white_count = state.currentBoard.white_piece;
@@ -189,65 +159,3 @@ long double Minimax::heuristic(AbaloneEnv& state) {
 
     return score + cohesion_score * 5 + safety_score * 1 + push_opportunity_score;
 }
-/*
-long double Minimax::heuristic(AbaloneEnv& state){
-
-    int pieces_of_white = 0;
-    int pieces_of_black = 0;
-    int distance_of_white_total = 0;
-    int distance_of_black_total = 0;
-    int score = 0;
-    for(int oneDpos = 0; oneDpos < state.number_of_place; oneDpos++){
-        pair<int, int> position = state.oneD_to_twoD[oneDpos];
-        if(state.currentBoard.white[oneDpos]){
-            distance_of_white_total += state.distance_to_center(position);
-            pieces_of_white++;
-            switch (state.distance_to_center(position))
-            {
-            case 4:
-                score -= 10000;
-                break;
-            case 3:
-                score -= 2000;
-                break;
-            case 2:
-                score += 20;
-                break;
-            case 1:
-                score += 70;
-                break;
-            case 0:
-                score += 100;
-                break;
-            }
-            
-        }
-        if(state.currentBoard.black[oneDpos]){
-            int dis = state.distance_to_center(position);
-            distance_of_black_total += dis;
-            pieces_of_black++;
-            switch (state.distance_to_center(position))
-            {
-            case 4:
-                score += 5000;
-                break;
-            case 3:
-                score += 500;
-                break;
-            case 2:
-                score -= 20;
-                break;
-            case 1:
-                score -= 70;
-                break;
-            case 0:
-                score -= 100;
-                break;
-            }
-        }
-    }
-    score += 3000*(state.population(true) - state.population(false));
-    score += 30000*(pieces_of_white - pieces_of_black);
-    
-}
-*/
