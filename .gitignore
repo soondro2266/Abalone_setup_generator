@@ -6,3 +6,5 @@ test
 *.exe
 gameRecord.txt
 model
+SomeLocalDir
+SomeLocalDir1
