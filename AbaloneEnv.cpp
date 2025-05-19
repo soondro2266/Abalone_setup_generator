@@ -471,5 +471,58 @@ int AbaloneEnv::distance_to_edge(pair<int,int> pos){
 }
 
 bool AbaloneEnv::can_push(int idx){
+    auto position = oneD_to_twoD[idx];
+    if(!currentBoard.player){//white
+        for(int direction = 0; direction < 6; direction++){
+            auto position2 = position + directions[direction];
+            if(!is_white(position2))continue;
+            auto position3 = position2 + directions[direction];
+            if(is_empty(position3) || !is_valid(position3))continue;
+            auto position4 = position3 + directions[direction];
+            if(is_white(position3)){// three pieces
+                if(is_black(position4)){
+                    auto position5 = position4 + directions[direction];
+                    if(is_empty(position5) || !is_valid(position5)){ //three push one
+                        return true;
+                    }
+                    else if(is_black(position5)){
+                        auto position6 = position5 + directions[direction];
+                        if(is_empty(position6) || !is_valid(position6)){ //three push two
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if(is_empty(position4) || !is_valid(position4)){ //two push one 
+                return true;
+            }
+        }
+    }
+    else{
+        for(int direction = 0; direction < 6; direction++){
+            auto position2 = position + directions[direction];
+            if(!is_black(position2))continue;
+            auto position3 = position2 + directions[direction];
+            if(is_empty(position3) || !is_valid(position3))continue;
+            auto position4 = position3 + directions[direction];
+            if(is_black(position3)){// three pieces
+                if(is_white(position4)){
+                    auto position5 = position4 + directions[direction];
+                    if(is_empty(position5) || !is_valid(position5)){ //three push one
+                        return true;
+                    }
+                    else if(is_white(position5)){
+                        auto position6 = position5 + directions[direction];
+                        if(is_empty(position6) || !is_valid(position6)){ //three push two
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if(is_empty(position4) || !is_valid(position4)){ //two push one 
+                return true;
+            }
+        }
+    }
     return false;
 }

@@ -156,8 +156,8 @@ long double Minimax::heuristic(AbaloneEnv& state){
     */
 
 long double Minimax::heuristic(AbaloneEnv& state) {
-    int white_count = state.population(true);
-    int black_count = state.population(false);
+    int white_count = state.currentBoard.white_piece;
+    int black_count = state.currentBoard.black_piece;
     long double score = (white_count - black_count) * 100.0;
 
     int safety_score = 0;
