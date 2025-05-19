@@ -82,6 +82,13 @@ public:
 
     int distance_to_center(pair<int, int>& position);
 
+    /**
+     * @brief Player color flag.
+     * 
+     * `false`  :player is white
+     * 
+     * `true` :player is black
+     */
     int population(bool player);
 
     void visit_population(pair<int, int> position, vector<vector<bool>>& visited, bool player);
