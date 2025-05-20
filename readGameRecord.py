@@ -1,3 +1,4 @@
+
 def is_valid(x: int, y: int, n: int):
     return not (
         x < 0 
@@ -31,7 +32,7 @@ def oneD_to_twoD(state: str, n: int, player: int):
     cnt = 0
     for i in range(2*n-1):
         for j in range(2*n-1):
-            if is_valid(i, j):
+            if is_valid(i, j, n):
                 valid_board[i][j] = 1
                 if is_white(state[cnt]):
                     white_board[i][j] = 1
@@ -46,12 +47,11 @@ def oneD_to_twoD(state: str, n: int, player: int):
     return state_
 
 
-def readGameRecord():
+def readGameRecord(n: int):
 
-    with open("./gameRecord.txt") as file:
+    with open("./minmax_result.txt") as file:
         records = file.readlines()
 
-    n = 5
     train_data = []
     train_label = []
     player = 1
@@ -61,7 +61,7 @@ def readGameRecord():
     _, last_action = records[-1].replace('\n', '').split(" ")
 
     # append first state
-    state = oneD_to_twoD(first_state, 5, player)
+    first_state = oneD_to_twoD(first_state, n, player)
     train_data.append(first_state)
 
     # get rid of last data (since last action is extracted)
@@ -71,10 +71,12 @@ def readGameRecord():
         player *= -1
         state, action = record.replace('\n', '').split(" ")
         state = oneD_to_twoD(state, n, player)
+        action = int(action)
         train_data.append(state)
         train_label.append(action)
 
     # append last action
+    last_action = int(last_action)
     train_label.append(last_action)
         
     return train_data, train_label
