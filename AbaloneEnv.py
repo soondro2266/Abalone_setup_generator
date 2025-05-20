@@ -170,7 +170,7 @@ class AbaloneEnv:
         else:
             reward = 0
         
-        return self.get_state_tensor, reward, self.finished
+        return self.get_state_tensor(), reward, self.finished
     
 
     def _check_done(self):

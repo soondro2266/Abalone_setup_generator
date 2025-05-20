@@ -50,5 +50,5 @@ def RL_policyNetwork():
 
 
 if __name__ == '__main__':
-    behavior_cloning()
+    #behavior_cloning()
     RL_policyNetwork()
