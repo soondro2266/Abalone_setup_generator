@@ -15,7 +15,6 @@ optimizer = optim.Adam(policy.parameters(), lr=1e-4)
 def train_one_episode(env: AbaloneEnv, policy, optimizer):
     log_probs, rewards = [], []
     state = env.get_state_tensor()
-    print(type(state))
     done = False
 
     # 蒐集軌跡
@@ -37,7 +36,7 @@ def train_one_episode(env: AbaloneEnv, policy, optimizer):
 
     # 計算折扣回報 G_t（也可以改成不折扣）
         
-    returns = torch.tensor(np.full(len(rewards), rewards[-1], dtype=torch.float32), device=device)
+    returns = torch.full((len(rewards),),rewards[-1],dtype=torch.float32,device=device)
 
     # 損失：－Σ log π(a|s) * G_t
     loss = 0

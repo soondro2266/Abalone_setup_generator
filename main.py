@@ -7,6 +7,7 @@ from CNN import CNN, train
 from readGameRecord import readGameRecord
 from PolicyNet import train_one_episode
 from AbaloneEnv import AbaloneEnv
+from tqdm import tqdm
 
 # pretrain Policy Network using record generate by Minmax
 def behavior_cloning():
@@ -36,7 +37,7 @@ def RL_policyNetwork():
     epoch = 1000
     policy.train()
 
-    for i in range(epoch):
+    for i in tqdm(range(epoch)):
         env = AbaloneEnv()
         base_params = [param for _, param in policy.named_parameters()]
         optimizer = optim.Adam(base_params, lr=1e-4)
