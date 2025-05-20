@@ -22,8 +22,8 @@ def save_model(model: CNN, path: str):
     torch.save(model.state_dict(), path)
 
 
-def load_model(path: str):
+def load_model(path: str, n: int):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = CNN().to(device)
+    model = CNN(n).to(device)
     model.load_state_dict(torch.load(path))
     return model

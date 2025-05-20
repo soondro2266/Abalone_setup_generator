@@ -52,7 +52,6 @@ class AbaloneEnv:
                                                  position[i][1]+self.directions[(direction+5)%6][1]))
                     side_move_position_2.append((position[i][0]+self.directions[(direction+1)%6][0],\
                                                  position[i][1]+self.directions[(direction+1)%6][1]))
-                can_push = False
                 if ally[position[1]]:
                     if empty[side_move_position_1[0]] and\
                        empty[side_move_position_1[1]]: #two side move second direction -1
