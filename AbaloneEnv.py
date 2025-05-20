@@ -38,11 +38,11 @@ class AbaloneEnv:
         enemy = self.white if self.player else self.black
         empty = np.logical_and(self.valid, np.logical_not(np.logical_or(self.black, self.white)))
         for oneD in range(self.number_of_place):
-            position:list[tuple[int, int]] = []
-            position.append(self.oneD_to_twoD[oneD])
-            if not ally[position[0]]:
+            if not ally[self.oneD_to_twoD[oneD]]:
                 continue
             for direction in range(6):
+                position:list[tuple[int, int]] = []
+                position.append(self.oneD_to_twoD[oneD])
                 for _ in range(5):
                     position.append((position[-1][0]+self.directions[direction][0], position[-1][1]+self.directions[direction][1]))
                 side_move_position_1 = []
@@ -81,7 +81,7 @@ class AbaloneEnv:
                         actions.append(oneD*42+2*6+direction)
                 elif empty[position[1]]: #one to empty
                     actions.append(oneD*42+direction)
-        return actions      
+        return actions
 
 
     def reset(self):
