@@ -4,7 +4,7 @@ import numpy as np
 
 class AbaloneEnv:
     def __init__(self, n = 5, white_state:list[int] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15]\
-                 , black_state:list[int] = [56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47, 59, 60]):
+                 , black_state:list[int] = [56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47, 59, 60], score = 6):
         
         self.number_of_edge = n
         self.size_of_matrix = 2*n-1
@@ -15,8 +15,13 @@ class AbaloneEnv:
         self.black: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.valid: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.player:bool = False
-        self.white_pieces = len(white_state)
-        self.black_pieces = len(black_state)
+        """
+        False : player is white
+        True : player is black
+        """
+        self.score = score
+        self.white_score = 0
+        self.black_score = 0
         for i in range(2*n-1):
             for j in range(2*n-1):
                 position = (i, j)
@@ -34,11 +39,8 @@ class AbaloneEnv:
 
     def get_all_actions(self):
         actions:list[int] = []
-        ally  = self.black if self.player else self.white
-        enemy = self.white if self.player else self.black
-        empty = np.logical_and(self.valid, np.logical_not(np.logical_or(self.black, self.white)))
         for oneD in range(self.number_of_place):
-            if not ally[self.oneD_to_twoD[oneD]]:
+            if not self._is_ally(self.oneD_to_twoD[oneD]):
                 continue
             for direction in range(6):
                 position:list[tuple[int, int]] = []
@@ -52,34 +54,34 @@ class AbaloneEnv:
                                                  position[i][1]+self.directions[(direction+5)%6][1]))
                     side_move_position_2.append((position[i][0]+self.directions[(direction+1)%6][0],\
                                                  position[i][1]+self.directions[(direction+1)%6][1]))
-                if ally[position[1]]:
-                    if empty[side_move_position_1[0]] and\
-                       empty[side_move_position_1[1]]: #two side move second direction -1
+                if self._is_ally(position[1]):
+                    if self._is_empty(side_move_position_1[0]) and\
+                       self._is_empty(side_move_position_1[1]): #two side move second direction -1
                         actions.append(oneD*42+1*6+direction)
-                    if empty[side_move_position_2[0]] and\
-                       empty[side_move_position_2[1]]: #two side move second direction 1
+                    if self._is_empty(side_move_position_2[0]) and\
+                       self._is_empty(side_move_position_2[1]): #two side move second direction 1
                         actions.append(oneD*42+3*6+direction)
-                    if ally[position[2]]:
-                        if empty[side_move_position_1[0]] and\
-                           empty[side_move_position_1[1]] and\
-                           empty[side_move_position_1[2]] : #three side move second direction -1
+                    if self._is_ally(position[2]):
+                        if self._is_empty(side_move_position_1[0]) and\
+                           self._is_empty(side_move_position_1[1]) and\
+                           self._is_empty(side_move_position_1[2]) : #three side move second direction -1
                             actions.append(oneD*42+4*6+direction)
-                        if empty[side_move_position_2[0]] and\
-                           empty[side_move_position_2[1]] and\
-                           empty[side_move_position_2[2]] : #three side move second direction -1
+                        if self._is_empty(side_move_position_2[0]) and\
+                           self._is_empty(side_move_position_2[1]) and\
+                           self._is_empty(side_move_position_2[2]) : #three side move second direction -1
                             actions.append(oneD*42+6*6+direction)
-                        if empty[position[3]]:#three to empty
+                        if self._is_empty(position[3]):#three to empty
                             actions.append(oneD*42+5*6+direction)
-                        elif enemy[position[3]]:
-                            if(empty[position[4]] or not self.valid[position[4]]): #three push one
+                        elif self._is_enemy(position[3]):
+                            if(self._is_empty(position[4]) or not self._is_valid(position[4])): #three push one
                                 actions.append(oneD*42+5*6+direction)
-                            elif enemy[position[4]] and (empty[position[5]] or not self.valid[position[5]]):#three push two
+                            elif self._is_enemy(position[4]) and (self._is_empty(position[5]) or not self._is_valid(position[5])):#three push two
                                 actions.append(oneD*42+5*6+direction)
-                    elif enemy[position[2]] and (empty[position[3]] or not self.valid[position[3]]):#two push one
+                    elif self._is_enemy(position[2]) and (self._is_empty(position[3]) or not self._is_valid(position[3])):#two push one
                         actions.append(oneD*42+2*6+direction)
-                    elif empty[position[2]]: #two to empty
+                    elif self._is_empty(position[2]): #two to empty
                         actions.append(oneD*42+2*6+direction)
-                elif empty[position[1]]: #one to empty
+                elif self._is_empty(position[1]): #one to empty
                     actions.append(oneD*42+direction)
         return actions
 
@@ -122,7 +124,6 @@ class AbaloneEnv:
 
         ally  = self.black if self.player else self.white
         enemy = self.white if self.player else self.black
-        empty = np.logical_and(self.valid, np.logical_not(np.logical_or(self.black, self.white)))
 
         if second_direction == 0:
             ally_first = self.oneD_to_twoD[oneDpos]
@@ -131,15 +132,20 @@ class AbaloneEnv:
             
             next_last_plus_one = next_first
             
-            while enemy[next_last_plus_one]:
+            while self._is_enemy(next_last_plus_one):
                 next_last_plus_one = (next_last_plus_one[0]+self.directions[direction][0], 
                                       next_last_plus_one[1]+self.directions[direction][1])
             
             ally[ally_first] = False
             ally[next_first] = True
             enemy[next_first] = False
-            if self.valid[next_last_plus_one]:
+            if self._is_empty(next_last_plus_one):
                 enemy[next_last_plus_one] = True
+            else:
+                if self.player:
+                    self.black_score += 1
+                else:
+                    self.white_score += 1
 
         else:
             position:list[tuple[int, int]] = []
@@ -173,6 +179,7 @@ class AbaloneEnv:
         #    next_state, reward, done, info
         return self.state, reward, self.finished, {}
     
+
     def _check_done(self):
         # … 判斷遊戲是不是結束 …
         return True or False
@@ -181,7 +188,29 @@ class AbaloneEnv:
         # … 根據最終局面決定 +1 or -1 …
         return +1 or -1
     
-    def _is_valid(self, position):
+    def get_state_tensor(self) -> np.ndarray:
+        """
+        Return a float32 NumPy array of shape (4, size_of_matrix, size_of_matrix) with four channels:
+        - Channel 0: white stones (self.white)
+        - Channel 1: black stones (self.black)
+        - Channel 2: valid move mask (self.valid)
+        - Channel 3: current player indicator (all entries set to –1 if the current player is white, +1 otherwise)
+        """
+        s_white = self.white.astype(np.float32)  # shape (size, size)
+        s_black = self.black.astype(np.float32)  # shape (size, size)
+        s_valid = self.valid.astype(np.float32)  # shape (size, size)
+
+        fill = 1.0 if self.player else -1.0
+        s_player = np.full(
+            (self.size_of_matrix, self.size_of_matrix),
+            fill,
+            dtype=np.float32
+        )
+
+        state_tensor = np.stack([s_white, s_black, s_valid, s_player], axis=0)
+        return state_tensor
+
+    def _is_valid(self, position:tuple[int, int])->bool:
         if  position[0] < 0 or\
             position[1] < 0 or\
             position[0] >= 2 * self.number_of_edge - 1 or\
@@ -190,3 +219,30 @@ class AbaloneEnv:
             position[0] - position[1] <= -self.number_of_edge:
             return False
         return True
+    
+    def _is_empty(self, position)->bool:
+        if not self._is_valid(position):
+            return False
+        return not (self.white[position[0]][position[1]] or self.black[position[0]][position[1]])
+
+    def _is_white(self, position)->bool:
+        if not self._is_valid(position):
+            return False
+        return self.white[position[0]][position[1]]
+    
+    def _is_black(self, position)->bool:
+        if not self._is_valid(position):
+            return False
+        return self.black[position[0]][position[1]]
+    
+    def _is_ally(self, position)->bool:
+        if self.player:
+            return self._is_black(position)
+        else:
+            return self._is_white(position)
+    
+    def _is_enemy(self, position)->bool:
+        if not self.player:
+            return self._is_black(position)
+        else:
+            return self._is_white(position)
