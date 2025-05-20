@@ -161,23 +161,16 @@ class AbaloneEnv:
                 ally[target_position[i]] = True
 
 
-
         self.player = not self.player      
 
-        # 1) 套用 action，更新 self.state
-        # 2) 檢查遊戲是否結束
         self.finished = self._check_done()
         
-        # 3) 設定 reward
         if self.finished:
-            # 假設 self._who_won() 回傳 +1（玩家勝）或 -1（玩家負）
             reward = self._who_won()
         else:
             reward = 0
         
-        # 4) 回傳四元組
-        #    next_state, reward, done, info
-        return self.state, reward, self.finished, {}
+        return self.get_state_tensor, reward, self.finished
     
 
     def _check_done(self):
@@ -246,3 +239,9 @@ class AbaloneEnv:
             return self._is_black(position)
         else:
             return self._is_white(position)
+        
+    def _check_done(self)->bool:
+        return self.white_score >= self.score or self.black_score >= self.score
+    
+    def _who_won(self)->int:
+        return 1 if self.white_score >- self.score else -1
