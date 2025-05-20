@@ -7,12 +7,13 @@ class TrainDataset(Dataset):
     def __init__(self, data, label):
         self.data = data
         self.label = label
+        self.tranformer = transforms.ToTensor()
 
     def __len__(self):
         return len(self.label)
 
     def __getitem__(self, idx):
-        data = transforms.ToTensor(self.data[idx])
+        data = torch.tensor(self.data[idx], dtype=torch.float32)
         label = self.label[idx]
         return data, label
     

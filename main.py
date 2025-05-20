@@ -8,13 +8,14 @@ from readGameRecord import readGameRecord
 
 # pretrain Policy Network using record generate by Minmax
 def behavior_cloning():
-   
-    train_data, train_label = readGameRecord()
+    
+    n = 5
+    train_data, train_label = readGameRecord(n)
     train_dataset = TrainDataset(train_data, train_label)
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    policyNetwork = CNN().to(device)
+    policyNetwork = CNN(n).to(device)
     criterion = nn.CrossEntropyLoss()
 
     base_params = [param for _, param in policyNetwork.named_parameters()]
@@ -24,13 +25,15 @@ def behavior_cloning():
 
     save_model(policyNetwork, './model/policyNetwork_pretrain.pth')
 
+"""
 # self playing (not done yet)
 def RL_policyNetwork():
     player = load_model('./model/policyNetwork_pretrain.pth')
     opponent = player
     player.train()
     opponent.eval()
+"""
+
 
 if __name__ == '__main__':
     behavior_cloning()
-    RL_policyNetwork()

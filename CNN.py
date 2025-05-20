@@ -9,9 +9,6 @@ class CNN(nn.Module):
         self.n = n
         # No pooling due to original size is too small (9*9)
         self.convLayer = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=4, kernel_size=3, padding=1),
-            nn.BatchNorm2d(4),
-            nn.ReLU(),
             nn.Conv2d(in_channels=4, out_channels=16, kernel_size=3, padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU(),
@@ -26,10 +23,8 @@ class CNN(nn.Module):
             nn.Flatten(),
             nn.Linear(64*(2*n-1)*(2*n-1), 16*(2*n-1)*(2*n-1)),
             nn.ReLU(),
-            nn.Linear(16*(2*n-1)*(2*n-1), 4*(2*n-1)*(2*n-1)),
-            nn.ReLU(),
             nn.Dropout(p=0.3),
-            nn.Linear(4*(2*n-1)*(2*n-1), 3*n*n-3*n+1)
+            nn.Linear(16*(2*n-1)*(2*n-1), 42*(3*n*n-3*n+1)),
         )
     def forward(self, x):
         x = self.convLayer(x)
