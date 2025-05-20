@@ -126,11 +126,8 @@ class AbaloneEnv:
 
         if second_direction == 0:
             ally_first = self.oneD_to_twoD[oneDpos]
-            ally_last = (ally_first[0]+number_of_piece*self.directions[direction][0], 
+            next_first = (ally_first[0]+number_of_piece*self.directions[direction][0], 
                          ally_first[1]+number_of_piece*self.directions[direction][1])
-            next_first = (ally_last[0]+self.directions[direction][0], 
-                          ally_last[1]+self.directions[direction][1])
-            next_last_plus_one = next_first
             
             while enemy[next_last_plus_one]:
                 next_last_plus_one = (next_last_plus_one[0]+number_of_piece*self.directions[direction][0], 
