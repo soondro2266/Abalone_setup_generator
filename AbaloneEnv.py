@@ -89,7 +89,60 @@ class AbaloneEnv:
         self.finished = False
         return self.state
 
-    def step(self, action):
+    def step(self, action:int):
+
+        oneDpos:int = action // 42
+        remainder = action % 42
+        type:int = remainder // 6
+        direction = remainder % 6
+
+        number_of_piece = 0
+        second_direction = 0
+        if type == 0:
+            number_of_piece = 1
+            second_direction = 0
+        elif type == 1:
+            number_of_piece = 2
+            second_direction = -1
+        elif type == 2:
+            number_of_piece = 2
+            second_direction = 0
+        elif type == 3:
+            number_of_piece = 2
+            second_direction = 1
+        elif type == 4:
+            number_of_piece = 3
+            second_direction = -1
+        elif type == 5:
+            number_of_piece = 3
+            second_direction = 0
+        elif type == 6:
+            number_of_piece = 3
+            second_direction = 1
+
+        ally  = self.black if self.player else self.white
+        enemy = self.white if self.player else self.black
+        empty = np.logical_and(self.valid, np.logical_not(np.logical_or(self.black, self.white)))
+
+        if second_direction == 0:
+            NotImplementedError
+        else:
+            position:list[tuple[int, int]] = []
+            target_position:list[tuple[int, int]] = []
+            position.append(self.oneD_to_twoD[oneDpos])
+            for _ in range(number_of_piece-1):
+                position.append((position[-1][0]+self.directions[direction][0], position[-1][1]+self.directions[direction][1]))
+            for i in range(number_of_piece):
+                target_position.append((position[i][0]+self.directions[(direction+second_direction+6)%6][0],\
+                                        position[i][1]+self.directions[(direction+second_direction+6)%6][1]))
+            for i in range(number_of_piece):
+                ally[position[i]] = False
+                ally[target_position[i]] = True
+
+
+
+        self.player = not self.player      
+
         # 1) 套用 action，更新 self.state
         # 2) 檢查遊戲是否結束
         self.finished = self._check_done()
