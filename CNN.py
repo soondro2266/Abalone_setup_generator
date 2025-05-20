@@ -9,9 +9,6 @@ class CNN(nn.Module):
         self.n = n
         # No pooling due to original size is too small (9*9)
         self.convLayer = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=4, kernel_size=3, padding=1),
-            nn.BatchNorm2d(4),
-            nn.ReLU(),
             nn.Conv2d(in_channels=4, out_channels=16, kernel_size=3, padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU(),
