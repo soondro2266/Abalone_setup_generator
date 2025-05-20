@@ -1,3 +1,5 @@
+import os
+
 
 def is_valid(x: int, y: int, n: int):
     return not (
@@ -24,7 +26,7 @@ def oneD_to_twoD(state: str, n: int, player: int):
     white_board = [[0 for _ in range(2*n-1)] for _ in range(2*n-1)]
     # black board
     black_board = white_board
-    # take turn board 1 stand for next move is black, -1 for white
+    # take turn board 1 stand for next move is provided by black, -1 for white
     takeTurn_board = [[player for _ in range(2*n-1)] for _ in range(2*n-1)]
     # valid board
     valid_board = white_board
@@ -49,34 +51,36 @@ def oneD_to_twoD(state: str, n: int, player: int):
 
 def readGameRecord(n: int):
 
-    with open("./minmax_result.txt") as file:
-        records = file.readlines()
-
     train_data = []
     train_label = []
-    player = 1
-    
-    # extract first state and last action
-    first_state, _ = records[0].replace('\n', '').split(" ")
-    _, last_action = records[-1].replace('\n', '').split(" ")
 
-    # append first state
-    first_state = oneD_to_twoD(first_state, n, player)
-    train_data.append(first_state)
+    for result in os.listdir("./minmax_results"):
+        with open("./minmax_results/"+result) as file:
+            records = file.readlines()
+            
+        player = 1
+        
+        # extract first state and last action
+        first_state, _ = records[0].replace('\n', '').split(" ")
+        _, last_action = records[-1].replace('\n', '').split(" ")
 
-    # get rid of last data (since last action is extracted)
-    records.pop()
+        # append first state
+        first_state = oneD_to_twoD(first_state, n, player)
+        train_data.append(first_state)
 
-    for record in records[1:]:
-        player *= -1
-        state, action = record.replace('\n', '').split(" ")
-        state = oneD_to_twoD(state, n, player)
-        action = int(action)
-        train_data.append(state)
-        train_label.append(action)
+        # get rid of last data (since last action is extracted)
+        records.pop()
 
-    # append last action
-    last_action = int(last_action)
-    train_label.append(last_action)
+        for record in records[1:]:
+            player *= -1
+            state, action = record.replace('\n', '').split(" ")
+            state = oneD_to_twoD(state, n, player)
+            action = int(action)
+            train_data.append(state)
+            train_label.append(action)
+
+        # append last action
+        last_action = int(last_action)
+        train_label.append(last_action)
         
     return train_data, train_label

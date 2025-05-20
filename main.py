@@ -5,6 +5,8 @@ from utils import TrainDataset, save_model, load_model
 from torch.utils.data import DataLoader
 from CNN import CNN, train
 from readGameRecord import readGameRecord
+from PolicyNet import train_one_episode
+from AbaloneEnv import AbaloneEnv
 
 # pretrain Policy Network using record generate by Minmax
 def behavior_cloning():
@@ -19,21 +21,34 @@ def behavior_cloning():
     criterion = nn.CrossEntropyLoss()
 
     base_params = [param for _, param in policyNetwork.named_parameters()]
-    optimizer = optim.Adam(base_params, lr=1.5*1e-4)
+    optimizer = optim.Adam(base_params, lr=1e-4)
 
     train(policyNetwork, train_loader, criterion, optimizer, device)
 
     save_model(policyNetwork, './model/policyNetwork_pretrain.pth')
 
-"""
-# self playing (not done yet)
+
 def RL_policyNetwork():
-    player = load_model('./model/policyNetwork_pretrain.pth')
-    opponent = player
-    player.train()
-    opponent.eval()
-"""
+
+    n = 5
+    policy = load_model('./model/policyNetwork_pretrain.pth', n)
+
+    epoch = 1000
+    policy.train()
+
+    for i in range(epoch):
+        env = AbaloneEnv()
+        base_params = [param for _, param in policy.named_parameters()]
+        optimizer = optim.Adam(base_params, lr=1e-4)
+        if i != 0: 
+            policy = load_model(f'./model/policy_{i-1}.pth', n)
+
+        train_one_episode(env, policy, optimizer)
+
+        save_model(policy, f'./model/policy_{i}.pth')
+
 
 
 if __name__ == '__main__':
     behavior_cloning()
+    RL_policyNetwork()

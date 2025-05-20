@@ -187,7 +187,7 @@ class AbaloneEnv:
         - Channel 0: white stones (self.white)
         - Channel 1: black stones (self.black)
         - Channel 2: valid move mask (self.valid)
-        - Channel 3: current player indicator (all entries set to –1 if the current player is white, +1 otherwise)
+        - Channel 3: current player indicator (all entries set to -1 if the current player is white, +1 otherwise)
         """
         s_white = self.white.astype(np.float32)  # shape (size, size)
         s_black = self.black.astype(np.float32)  # shape (size, size)

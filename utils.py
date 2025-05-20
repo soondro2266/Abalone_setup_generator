@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-from CNN import CNN
+from CNN import CNN, CNN_
 
 class TrainDataset(Dataset):
     def __init__(self, data, label):
@@ -24,6 +24,6 @@ def save_model(model: CNN, path: str):
 
 def load_model(path: str, n: int):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = CNN(n).to(device)
+    model = CNN_(n).to(device)
     model.load_state_dict(torch.load(path))
     return model
