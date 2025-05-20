@@ -132,8 +132,8 @@ class AbaloneEnv:
             next_last_plus_one = next_first
             
             while enemy[next_last_plus_one]:
-                next_last_plus_one = (next_last_plus_one[0]+number_of_piece*self.directions[direction][0], 
-                                      next_last_plus_one[1]+number_of_piece*self.directions[direction][1])
+                next_last_plus_one = (next_last_plus_one[0]+self.directions[direction][0], 
+                                      next_last_plus_one[1]+self.directions[direction][1])
             
             ally[ally_first] = False
             ally[next_first] = True
