@@ -1,13 +1,12 @@
 import torch
 from torch.utils.data import Dataset
-from torchvision import transforms
 from CNN import CNN, CNN_
+import matplotlib.pyplot as plt
 
-class TrainDataset(Dataset):
+class preTrainDataset(Dataset):
     def __init__(self, data, label):
         self.data = data
         self.label = label
-        self.tranformer = transforms.ToTensor()
 
     def __len__(self):
         return len(self.label)
@@ -27,3 +26,12 @@ def load_model(path: str, n: int):
     model = CNN_(n).to(device)
     model.load_state_dict(torch.load(path))
     return model
+
+def draw(epoch: int, losses: list):
+    x = [i for i in range(epoch)]
+    y = losses
+    plt.plot(x, y, color='blue', linewidth=2, marker='o')    
+    plt.xlabel("epoch")
+    plt.ylabel("loss")                
+    plt.savefig('epoch-loss.png')
+    plt.show()   

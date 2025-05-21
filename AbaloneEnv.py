@@ -135,13 +135,15 @@ class AbaloneEnv:
             while self._is_enemy(next_last_plus_one):
                 next_last_plus_one = (next_last_plus_one[0]+self.directions[direction][0], 
                                       next_last_plus_one[1]+self.directions[direction][1])
+                
+
             
             ally[ally_first] = False
             ally[next_first] = True
             enemy[next_first] = False
             if self._is_empty(next_last_plus_one):
                 enemy[next_last_plus_one] = True
-            else:
+            elif not self._is_valid(next_last_plus_one):
                 if self.player:
                     self.black_score += 1
                 else:
@@ -172,14 +174,46 @@ class AbaloneEnv:
         
         return self.get_state_tensor(), reward, self.finished
     
+    def show_current_board(self):
+        rows = 2 * self.number_of_edge - 1
+        cols = 4 * self.number_of_edge - 1
+        mask = [[0 for _ in range(cols)] for _ in range(rows)]
 
-    def _check_done(self):
-        # … 判斷遊戲是不是結束 …
-        return True or False
+        for i in range(rows):
+            for j in range(rows):  # 注意這裡還是 rows 不是 cols
+                position = (i, j)
+                if not self.valid[position]:
+                    continue
 
-    def _who_won(self):
-        # … 根據最終局面決定 +1 or -1 …
-        return +1 or -1
+                if i < self.number_of_edge:
+                    mask_j = abs(self.number_of_edge - i - 1) + 2 * j
+                else:
+                    mask_j = abs(self.number_of_edge - i - 1) + 2 * (j - i + self.number_of_edge - 1)
+
+                if self.white[position]:
+                    mask[i][mask_j] = 1
+                elif self.black[position]:
+                    mask[i][mask_j] = 2
+                else:
+                    mask[i][mask_j] = 3
+
+        # 輸出棋盤
+        for i in range(rows):
+            row_str = ""
+            for j in range(cols):
+                if mask[i][j] == 1:
+                    row_str += "W"
+                elif mask[i][j] == 2:
+                    row_str += "B"
+                elif mask[i][j] == 3:
+                    row_str += "."
+                else:
+                    row_str += " "
+            print(row_str)
+
+        print(f"white score: {self.white_score}")
+        print(f"black score: {self.black_score}")
+    
     
     def get_state_tensor(self) -> np.ndarray:
         """
@@ -244,4 +278,4 @@ class AbaloneEnv:
         return self.white_score >= self.score or self.black_score >= self.score
     
     def _who_won(self)->int:
-        return 1 if self.white_score >- self.score else -1
+        return 1 if self.white_score >= self.score else -1

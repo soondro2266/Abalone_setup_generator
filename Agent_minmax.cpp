@@ -16,8 +16,6 @@ using namespace std;
 
 
 
-
-
 void Minimax::start(Board initial_state, int max_depth, int max_round, string path){
     vector<pair<Board, int>> best_moves;
 
@@ -69,9 +67,6 @@ pair<Board, int> Minimax::find_best_action(AbaloneEnv& game){
     }
     return best_move;
 }
-
-
-
 
 
 long double Minimax::alphabeta(Board& current_state, int depth, bool maximizingPlayer, long double alpha, long double beta) {
