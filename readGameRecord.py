@@ -25,11 +25,11 @@ def oneD_to_twoD(state: str, n: int, player: int):
     # white board
     white_board = [[0 for _ in range(2*n-1)] for _ in range(2*n-1)]
     # black board
-    black_board = white_board
+    black_board = [[0 for _ in range(2*n-1)] for _ in range(2*n-1)]
     # take turn board 1 stand for next move is provided by black, -1 for white
     takeTurn_board = [[player for _ in range(2*n-1)] for _ in range(2*n-1)]
     # valid board
-    valid_board = white_board
+    valid_board = [[0 for _ in range(2*n-1)] for _ in range(2*n-1)]
 
     cnt = 0
     for i in range(2*n-1):
