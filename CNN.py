@@ -80,7 +80,7 @@ def pretrain(model: CNN, train_loader: DataLoader, criterion, optimizer, device)
     avg_loss = total_loss/num_batch
     return avg_loss
 
-def train(env: AbaloneEnv, policy: CNN_, opponent: CNN_, optimizer, device: torch.device):
+def train(env: AbaloneEnv, policy: CNN_, opponent: CNN_, optimizer, device: torch.device)-> torch.Tensor:
     policy.train()
     opponent.eval()
     log_probs = []
@@ -121,7 +121,7 @@ def train(env: AbaloneEnv, policy: CNN_, opponent: CNN_, optimizer, device: torc
         loss = loss - log_p * Gt
     loss = loss / len(log_probs) 
 
-    loss.to(device)
+    loss = loss.to(device)
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()

@@ -35,7 +35,7 @@ def RL_policyNetwork():
     epoch = 1000
     losses = []
 
-    policy = load_model('./model/policyNetwork_pretrain.pth', n)
+    policy = load_model('./model/policy_999.pth', n)
     opponent = policy
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_params = [param for _, param in policy.named_parameters()]
@@ -49,7 +49,7 @@ def RL_policyNetwork():
             policy.load_state_dict(torch.load(f'./model/policy_{i-1}.pth'))
 
         loss = train(env, policy, opponent, optimizer, device)
-        losses.append(loss)
+        losses.append(loss.detach().item())
 
         save_model(policy, f'./model/policy_{i}.pth')
 
