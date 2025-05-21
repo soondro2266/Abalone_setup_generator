@@ -32,14 +32,14 @@ def behavior_cloning():
 def RL_policyNetwork():
 
     n = 5
-    epoch = 1000
+    epoch = 100
     losses = []
 
-    policy = load_model('./model/policy_999.pth', n)
+    policy = load_model('./model/policy_99.pth', n)
     opponent = policy
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_params = [param for _, param in policy.named_parameters()]
-    optimizer = optim.Adam(base_params, lr=1e-4)
+    optimizer = optim.Adam(base_params, lr=2*1e-4)
     
 
     for i in tqdm(range(epoch)):
@@ -53,10 +53,12 @@ def RL_policyNetwork():
 
         save_model(policy, f'./model/policy_{i}.pth')
 
+    save_model(policy, f'./bestModel.pth')
+
     draw(epoch, losses)
 
 
 
 if __name__ == '__main__':
-    behavior_cloning()
+    #behavior_cloning()
     RL_policyNetwork()
