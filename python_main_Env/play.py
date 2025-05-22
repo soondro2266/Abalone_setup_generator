@@ -1,5 +1,5 @@
 import torch
-from python_main_Env.AbaloneEnv import AbaloneEnv
+from AbaloneEnv import AbaloneEnv
 from tqdm import tqdm
 from CNN import CNN_
 from utils import load_model
