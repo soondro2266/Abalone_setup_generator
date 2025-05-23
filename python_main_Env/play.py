@@ -1,7 +1,7 @@
 import torch
 from AbaloneEnv import AbaloneEnv
 from tqdm import tqdm
-from CNN import CNN_
+from CNN import PolicyNet
 from utils import load_model
 
 
@@ -16,6 +16,8 @@ def play(policy_, opponent_):
     opponent.eval()
     policy_win = 0
     opponent_win = 0
+    states = []
+    T = 0
 
     terminate = False
 
@@ -23,6 +25,9 @@ def play(policy_, opponent_):
     turn = 1
     while not terminate:
         state = env.get_state_tensor()
+        if turn == 1:
+            states.append(torch.tensor(state))
+            T += 1
         s = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(device)
 
         probs = player[turn](s).squeeze(0)
@@ -58,7 +63,8 @@ def play(policy_, opponent_):
                 opponent_win += 1
         #env.show_current_board()
     
-    return policy_win, opponent_win
+    states = tuple(states)
+    return policy_win, opponent_win, states, T
 
 def multi_play(policy_model_name: str, opponent_model_name: str, round_: int, n: int):
     policy = load_model(f"./python_main_Env/{policy_model_name}.pth", n)
@@ -68,12 +74,12 @@ def multi_play(policy_model_name: str, opponent_model_name: str, round_: int, n:
     opponent_wins = 0
 
     for _ in tqdm(range(round)):
-        policy_win, opponent_win = play(policy, opponent)
+        policy_win, opponent_win, _, _ = play(policy, opponent)
         policy_wins += policy_win
         opponent_wins += opponent_win
         
     print(f"policy win: {policy_wins}/{round}")
     print(f"opponent win: {opponent_wins}/{round}")
 
-
-multi_play("bestModel", "model/policyNetwork_pretrain", 100, 5)
+if __name__ == '__main__':
+    multi_play("bestModel", "model/policyNetwork_pretrain", 10, 5)

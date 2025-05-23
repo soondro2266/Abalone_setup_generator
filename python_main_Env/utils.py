@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from CNN import CNN, CNN_
+from CNN import CNN, PolicyNet
 import matplotlib.pyplot as plt
 
 class preTrainDataset(Dataset):
@@ -17,13 +17,14 @@ class preTrainDataset(Dataset):
         return data, label
     
 
-def save_model(model: CNN, path: str):
+def save_model(model: torch.nn, path: str):
     torch.save(model.state_dict(), path)
+
 
 
 def load_model(path: str, n: int):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = CNN_(n).to(device)
+    model = PolicyNet(n).to(device)
     model.load_state_dict(torch.load(path))
     return model
 
