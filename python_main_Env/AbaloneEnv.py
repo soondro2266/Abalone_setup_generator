@@ -36,6 +36,18 @@ class AbaloneEnv:
             position = self.oneD_to_twoD[oneD]
             self.black[position[0]][position[1]] = True
         pass
+    
+    def load_state_string(self)->str:
+        result:str = ""
+        for i in range(self.number_of_place):
+            position = self.oneD_to_twoD[i]
+            if self._is_white(position):
+                result += "1"
+            elif self._is_black(position):
+                result += "2"
+            else:
+                result += "0"
+        return result
 
     def get_all_actions(self):
         actions:list[int] = []
