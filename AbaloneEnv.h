@@ -112,6 +112,6 @@ public:
     vector<pair<int, int>> directions;
     
     int twoD_to_oneD(pair<int, int> position);
-
+    int count;
     
 };
