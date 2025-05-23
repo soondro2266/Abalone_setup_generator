@@ -10,7 +10,7 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-fs::path relative = "../minmax_results/test.txt";
+fs::path relative = "../minmax_results/";
 string path = (fs::current_path() / relative).string();
 
 
@@ -59,7 +59,7 @@ void run_random_game(int edge, int pieces){
 
         Minimax minmax;
 
-        minmax.start(game.currentBoard, dep, round, path);
+        minmax.start(game.currentBoard, dep, round, path + to_string(i+1) + ".txt");
     }
 }
 
