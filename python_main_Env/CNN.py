@@ -143,16 +143,22 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
         probs = player[turn](s).squeeze(0)
 
         all_possible_action = env.get_all_actions()  
-        legal_probs = probs[all_possible_action]        
-        legal_probs = legal_probs / legal_probs.sum()
+        
+        setpSuccess = False
+        while not stepSuccess:
+            legal_probs = probs[all_possible_action]        
+            legal_probs = legal_probs / legal_probs.sum()
+            dist = torch.distributions.Categorical(legal_probs)
+            a = dist.sample()
+            idx_in_legal = a.item()   
+            action = all_possible_action[idx_in_legal]
+            state, reward, done, stepSuccess = env.step(action)
+            if not stepSuccess:
+                all_possible_action.remove(action)
 
-        dist = torch.distributions.Categorical(legal_probs)
-        a = dist.sample()
-        idx_in_legal = a.item()   
-        action = all_possible_action[idx_in_legal]
         if player[turn] == policy:  
             log_probs.append(dist.log_prob(a))
-        state, reward, done = env.step(action)
+
         turn *= -1
     
     if reward == 1:

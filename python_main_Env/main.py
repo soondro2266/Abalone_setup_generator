@@ -36,8 +36,8 @@ def RL_policyNetwork():
     epoch = 1000
     losses = []
 
-    policy = load_model('./python_main_Env/bestModel.pth', n)
-    opponent = load_model('./python_main_Env/bestModel.pth', n)
+    policy = load_model('./python_main_Env/model/policy_999.pth', n)
+    opponent = load_model('./python_main_Env/model/policy_999.pth', n)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_params = [param for _, param in policy.named_parameters()]
     optimizer = optim.Adam(base_params, lr=2*1e-4)
@@ -54,7 +54,7 @@ def RL_policyNetwork():
 
         save_model(policy, f'./python_main_Env/model/policy_{i}.pth')
 
-    #save_model(policy, f'./python_main_Env/bestModel.pth')
+    save_model(policy, f'./python_main_Env/bestModel.pth')
 
     draw(epoch, losses)
 
@@ -85,5 +85,5 @@ def RL_valueNetwork():
 
 if __name__ == '__main__':
     #behavior_cloning()
-    #RL_policyNetwork()
-    RL_valueNetwork()
+    RL_policyNetwork()
+    #RL_valueNetwork()
