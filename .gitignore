@@ -1,10 +1,11 @@
 env
 __pycache__
-board.txt
 .vscode
 test
 *.exe
-gameRecord.txt
 model
 SomeLocalDir
 SomeLocalDir1
+*.txt
+minmax_result.txt
+epoch-loss.png
