@@ -15,6 +15,7 @@ class AbaloneEnv:
         self.black: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.valid: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.player:bool = False
+        self.game_history:dict[str, list[int]] = {}
         """
         False : player is white
         True : player is black
@@ -35,7 +36,6 @@ class AbaloneEnv:
         for oneD in black_state:
             position = self.oneD_to_twoD[oneD]
             self.black[position[0]][position[1]] = True
-        pass
     
     def load_state_string(self)->str:
         result:str = ""
@@ -50,7 +50,10 @@ class AbaloneEnv:
         return result
 
     def get_all_actions(self):
-        actions:list[int] = []
+        state_str:str = self.load_state_string()
+        if state_str in self.game_history:
+            return self.game_history[state_str]
+        actions = []
         for oneD in range(self.number_of_place):
             if not self._is_ally(self.oneD_to_twoD[oneD]):
                 continue
@@ -95,15 +98,34 @@ class AbaloneEnv:
                         actions.append(oneD*42+2*6+direction)
                 elif self._is_empty(position[1]): #one to empty
                     actions.append(oneD*42+direction)
+
+        self.game_history[state_str] = []      
+        for action in actions:
+            self.game_history[state_str].append(action)
         return actions
 
 
-    def reset(self):
-        # 重置遊戲，回傳初始 state
+    def reset(self, white_state:list[int] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15]\
+                 , black_state:list[int] = [56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47, 59, 60]):
         self.finished = False
-        return self.state
+        self.game_history = {}
+        self.white[:] = 0
+        self.black[:] = 0
+        self.player:bool = False
+        self.white_score = 0
+        self.black_score = 0
+
+        for oneD in white_state:
+            position = self.oneD_to_twoD[oneD]
+            self.white[position[0]][position[1]] = True
+        for oneD in black_state:
+            position = self.oneD_to_twoD[oneD]
+            self.black[position[0]][position[1]] = True
 
     def step(self, action:int):
+
+        state_str = self.load_state_string()
+        self.game_history[state_str].remove(action)
 
         oneDpos:int = action // 42
         remainder = action % 42
