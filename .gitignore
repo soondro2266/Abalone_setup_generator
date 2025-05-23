@@ -6,6 +6,6 @@ test
 model
 SomeLocalDir
 SomeLocalDir1
-*.txt
 minmax_result.txt
 epoch-loss.png
+*.txt
