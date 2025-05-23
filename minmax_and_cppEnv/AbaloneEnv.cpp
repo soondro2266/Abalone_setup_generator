@@ -70,6 +70,7 @@ void AbaloneAction::load_value(int value){
 AbaloneEnv::AbaloneEnv(){}
 
 AbaloneEnv::AbaloneEnv(int n){
+    count = 1;
     number_of_edge = n;
     currentBoard = Board(n);
     number_of_place = 3 * n * (n - 1) + 1;
@@ -86,6 +87,7 @@ AbaloneEnv::AbaloneEnv(int n){
 }
 
 AbaloneEnv::AbaloneEnv(Board board){
+    count = 1;
     currentBoard = board;
     int n = board.n;
     number_of_edge = n;
@@ -120,6 +122,7 @@ void AbaloneEnv::load_customize_setup(vector<int> white_setup, vector<int> black
 }
 
 void AbaloneEnv::load_default_setup(){
+    count = 1;
     vector<int> defaultWhite = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15};
     vector<int> defaultBlack = {56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47, 59, 60};
     currentBoard = Board(number_of_edge);
