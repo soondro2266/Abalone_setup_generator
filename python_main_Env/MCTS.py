@@ -56,7 +56,27 @@ class MCTS:
 
         return seleted_action
     
+    def expansion(self, action:int):
 
+        self.game.step(action) #state become state'
+
+        all_possible_action_prime = self.game.get_all_actions()
+        policy_net_probility = self.policy_network(self.game.get_state_tensor())
+
+        all_possible_probility = policy_net_probility[all_possible_action_prime]        
+        all_possible_probility = all_possible_probility / all_possible_probility.sum()
+
+        dist = torch.distributions.Categorical(all_possible_probility)
+        a = dist.sample()  
+        action_prime = all_possible_action_prime[a.item()]
+
+        self.game.step(action_prime) #state' become state t+1 
+
+    
+
+         
+    
+    
             
 
 
