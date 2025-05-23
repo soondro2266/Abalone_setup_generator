@@ -15,7 +15,7 @@ class AbaloneEnv:
         self.black: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.valid: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.player:bool = False
-        self.game_history:dict[str, list[int]] = {}
+        self.game_history:list[str] = []
         """
         False : player is white
         True : player is black
@@ -50,9 +50,6 @@ class AbaloneEnv:
         return result
 
     def get_all_actions(self):
-        state_str:str = self.load_state_string()
-        if state_str in self.game_history:
-            return self.game_history[state_str]
         actions = []
         for oneD in range(self.number_of_place):
             if not self._is_ally(self.oneD_to_twoD[oneD]):
@@ -99,16 +96,13 @@ class AbaloneEnv:
                 elif self._is_empty(position[1]): #one to empty
                     actions.append(oneD*42+direction)
 
-        self.game_history[state_str] = []      
-        for action in actions:
-            self.game_history[state_str].append(action)
         return actions
 
 
     def reset(self, white_state:list[int] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15]\
                  , black_state:list[int] = [56, 57, 58, 50, 51, 52, 53, 54, 55, 45, 46, 47, 59, 60]):
         self.finished = False
-        self.game_history = {}
+        self.game_history = []
         self.white[:] = 0
         self.black[:] = 0
         self.player:bool = False
@@ -124,8 +118,8 @@ class AbaloneEnv:
 
     def step(self, action:int):
 
-        state_str = self.load_state_string()
-        self.game_history[state_str].remove(action)
+        old_state_str = self.load_state_string()
+        self.game_history.append(old_state_str)
 
         oneDpos:int = action // 42
         remainder = action % 42
@@ -203,10 +197,23 @@ class AbaloneEnv:
         
         if self.finished:
             reward = self._who_won()
+            return self.get_state_tensor(), reward, self.finished, True
         else:
             reward = 0
-        
-        return self.get_state_tensor(), reward, self.finished
+            current_state_str = self.load_state_string()
+            if current_state_str in self.game_history:
+                self.finished = False
+                self.player = not self.player
+                self.white[:] = 0
+                self.black[:] = 0
+                for i in range(self.number_of_place):
+                    if old_state_str[i] == '1':
+                        self.white[self.oneD_to_twoD[i]] = True
+                    elif old_state_str[i] == '2':
+                        self.black[self.oneD_to_twoD[i]] = True
+                return self.get_state_tensor(), reward, self.finished, False
+            else:
+                return self.get_state_tensor(), reward, self.finished, True
     
     def show_current_board(self):
         rows = 2 * self.number_of_edge - 1
