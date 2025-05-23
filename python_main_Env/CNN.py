@@ -144,7 +144,7 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
 
         all_possible_action = env.get_all_actions()  
         
-        setpSuccess = False
+        stepSuccess = False
         while not stepSuccess:
             legal_probs = probs[all_possible_action]        
             legal_probs = legal_probs / legal_probs.sum()
