@@ -33,29 +33,22 @@ def play(policy_, opponent_):
         probs = player[turn](s).squeeze(0)
 
         all_possible_action = env.get_all_actions()  
-        legal_probs = probs[all_possible_action]        
-        legal_probs = legal_probs / legal_probs.sum()
-
-        dist = torch.distributions.Categorical(legal_probs)
-        a = dist.sample()
-        idx_in_legal = a.item()   
-        best_action = all_possible_action[idx_in_legal]
-
-        """
-        pi = policy(s).squeeze(0)
-        #best_action = torch.argmax(pi)
         
-        possible_action = env.get_all_actions()
-        best_action = possible_action[0]
-
-        for action in possible_action:
-            if pi[action] > pi[best_action]:
-                best_action = action
-        """
 
         turn *= -1
+
+        stepSuccess = False
+        while not stepSuccess:
+            legal_probs = probs[all_possible_action]        
+            legal_probs = legal_probs / legal_probs.sum()
+
+            dist = torch.distributions.Categorical(legal_probs)
+            a = dist.sample()
+            idx_in_legal = a.item()   
+            best_action = all_possible_action[idx_in_legal]
+            _, _, terminate, stepSuccess = env.step(best_action)
+            all_possible_action.remove(best_action)
        
-        _, _, terminate = env.step(best_action)
         if terminate:
             if player[turn] == policy:
                 policy_win += 1
@@ -78,8 +71,8 @@ def multi_play(policy_model_name: str, opponent_model_name: str, round_: int, n:
         policy_wins += policy_win
         opponent_wins += opponent_win
         
-    print(f"policy win: {policy_wins}/{round}")
-    print(f"opponent win: {opponent_wins}/{round}")
+    print(f"policy win: {policy_wins}/{round}, using model: {policy_model_name}")
+    print(f"opponent win: {opponent_wins}/{round}, using model: {opponent_model_name}")
 
 if __name__ == '__main__':
-    multi_play("bestModel", "model/policyNetwork_pretrain", 10, 5)
+    multi_play("bestPolicyModel", "bestPolicyModel_2", 50, 5)
