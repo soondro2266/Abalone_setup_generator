@@ -36,8 +36,8 @@ def RL_policyNetwork():
     epoch = 1000
     losses = []
 
-    policy = load_model('./python_main_Env/model/policy_999.pth', n)
-    opponent = load_model('./python_main_Env/model/policy_999.pth', n)
+    policy = load_model('./python_main_Env/bestPolicyModel.pth', n)
+    opponent = load_model('./python_main_Env/bestPolicyModel.pth', n)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_params = [param for _, param in policy.named_parameters()]
     optimizer = optim.Adam(base_params, lr=5*1e-4)
