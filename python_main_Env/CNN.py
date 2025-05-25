@@ -138,7 +138,11 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
 
     while not done:
         s = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(device)  # (1,4,9,9)
-        probs = player[turn](s).squeeze(0)
+        if player[turn] is policy:
+            probs = policy(s).squeeze(0)
+        else:
+            with torch.no_grad():
+                probs = opponent(s).squeeze(0)
 
         all_possible_action = env.get_all_actions()  
         
@@ -152,7 +156,7 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
             legal_probs = legal_probs / legal_probs.sum()
             dist = torch.distributions.Categorical(legal_probs)
             a = dist.sample()
-            idx_in_legal = a.item()   
+            idx_in_legal = a.item()
             action = all_possible_action[idx_in_legal]
             state, reward, done, stepSuccess = env.step(action)
             if not stepSuccess:
@@ -161,6 +165,7 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
         if player[turn] == policy:  
             log_probs.append(dist.log_prob(a))
 
+        del dist, a, legal_probs, probs, s
         turn *= -1
     
     if reward == 1:
@@ -180,6 +185,7 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
     loss.backward()
     optimizer.step()
 
+    torch.cuda.empty_cache()
     return loss
 
 def train_ValueNet(value_net, states, T, n, policy_reward, optimizer, device):
