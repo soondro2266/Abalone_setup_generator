@@ -95,9 +95,7 @@ class ValueNet(nn.Module):
             nn.Flatten(),
             nn.Linear(feat_dim, hidden_dim),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.3),
-            nn.Linear(hidden_dim, 1),   # 輸出一個標量 v(s)
-            nn.Tanh(),                   # 壓縮到 [-1,1]
+            nn.Linear(hidden_dim, 1),   # 輸出一個標量 v(s)                   
         )
 
     def forward(self, x):
@@ -184,18 +182,18 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
 
     return loss
 
-def train_ValueNet(value_net, states, T: int, n: int, policy_reward: int, optimizer, device)-> torch.Tensor:
+def train_ValueNet(value_net, states, T, n, policy_reward, optimizer, device):
 
+    gamma = 0.99
+    S = torch.stack(states, dim=0).to(device)
+    U = torch.tensor([policy_reward * (gamma ** (T - 1 - t)) for t in range(T)], device=device)
 
-    # 將 T 個 state 疊成一個 batch
-    S = torch.stack(states, dim=0).to(device)          # shape: (T,4,2n-1,2n-1)
-    U = torch.full((T,), policy_reward, device=device, dtype=torch.float32)  # 即 u_t
-
-    V_hat = value_net(S)                               # shape: (T,)
-    loss  = 0.5 * F.mse_loss(V_hat, U, reduction='sum') # L = Σ ½ (v - u)^2
+    V_hat = value_net(S)
+    loss  = F.mse_loss(V_hat, U, reduction='mean')
 
     optimizer.zero_grad()
     loss.backward()
+    torch.nn.utils.clip_grad_norm_(value_net.parameters(), 5.0)
     optimizer.step()
 
     return loss

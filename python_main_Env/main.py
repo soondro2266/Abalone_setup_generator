@@ -68,11 +68,12 @@ def RL_valueNetwork():
     epoch = 1000
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     value_net = ValueNet(n).to(device)
-    optimizer = torch.optim.Adam(value_net.parameters(), lr=1e-4)
-    policy = load_model('./python_main_Env/bestModel.pth', n)
-    opponent = load_model('./python_main_Env/model/policyNetwork_pretrain.pth', n)
+    optimizer = torch.optim.Adam(value_net.parameters(), lr=1e-5)
+    policy = load_model('./python_main_Env/bestPolicyModel.pth', n)
+    opponent = load_model('./python_main_Env/bestPolicyModel.pth', n)
     losses = []
 
+    min_loss = 1e10
     for i in tqdm(range(epoch)):
         policy_reward, _, states, T = play(policy, opponent)
         if policy_reward == 0:
@@ -82,12 +83,14 @@ def RL_valueNetwork():
 
         save_model(value_net, f'./python_main_Env/model/valueNet/value_{i}.pth')
 
-    save_model(value_net, f'./python_main_Env/bestValueModel2.pth')
+        if loss < min_loss:
+            save_model(value_net, f'./python_main_Env/bestValueModel2.pth')
+            min_loss = loss
 
     draw(epoch, losses)
 
 
 if __name__ == '__main__':
     #behavior_cloning()
-    RL_policyNetwork()
-    #RL_valueNetwork()
+    #RL_policyNetwork()
+    RL_valueNetwork()

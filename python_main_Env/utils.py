@@ -31,7 +31,7 @@ def load_model(path: str, n: int):
 def draw(epoch: int, losses: list):
     x = [i for i in range(epoch)]
     y = losses
-    plt.plot(x, y, color='blue', linewidth=2, marker='o')    
+    plt.plot(x, y, color='blue', linewidth=2, marker='.')    
     plt.xlabel("epoch")
     plt.ylabel("loss")                
     plt.savefig('epoch-loss.png')
