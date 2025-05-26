@@ -14,8 +14,8 @@ class AbaloneEnv:
         self.white: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.black: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
         self.valid: np.ndarray = np.zeros((2*n-1, 2*n-1), dtype=bool)
-        self.player:bool = False
-        self.game_history:list[str] = []
+        self.player: bool = False
+        self.game_history: list[str] = []
         """
         False : player is white
         True : player is black

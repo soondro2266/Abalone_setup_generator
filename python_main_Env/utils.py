@@ -22,7 +22,7 @@ def save_model(model: torch.nn, path: str):
 
 
 
-def load_model(path: str, n: int):
+def load_model(path: str, n: int = 5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = PolicyNet(n).to(device)
     model.load_state_dict(torch.load(path))
@@ -31,7 +31,7 @@ def load_model(path: str, n: int):
 def draw(epoch: int, losses: list):
     x = [i for i in range(epoch)]
     y = losses
-    plt.plot(x, y, color='blue', linewidth=2, marker='o')    
+    plt.plot(x, y, color='blue', linewidth=2, marker='.')    
     plt.xlabel("epoch")
     plt.ylabel("loss")                
     plt.savefig('epoch-loss.png')
