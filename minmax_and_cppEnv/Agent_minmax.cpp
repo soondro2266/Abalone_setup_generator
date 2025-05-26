@@ -120,85 +120,15 @@ long double Minimax::alphabeta(Board& current_state, int depth, bool maximizingP
         return minEval;
     }
 }
-/*
+
 long double Minimax::heuristic(AbaloneEnv& state){
 
     int pieces_of_white = 0;
     int pieces_of_black = 0;
-    int distance_of_white = 0;
-    int distance_of_black = 0;
-    for(int oneDpos = 0; oneDpos < state.number_of_place; oneDpos++){
-        pair<int, int> position = state.oneD_to_twoD[oneDpos];
-        if(state.currentBoard.white[oneDpos]){
-            distance_of_white += state.distance_to_center(position);
-            pieces_of_white++;
-        }
-        if(state.currentBoard.black[oneDpos]){
-            distance_of_black += state.distance_to_center(position);
-            pieces_of_black++;
-        }
-    }
-    long double h1 = (long double)distance_of_black/pieces_of_black - (long double)distance_of_white/pieces_of_white;
-
-    long double h2 = 0;
-    if(fabs(h1) > 2){
-        h2 = state.population(true) - state.population(false);
-    }
-    
-    int h3 = 0;
-    if(fabs(h1) < 1.8){
-        h3 = (pieces_of_white - pieces_of_black)* 100;
-    }
-    
-    return h1 + h2 + h3;
-}
-long double Minimax::heuristic(AbaloneEnv& state) {
-    int white_count = state.currentBoard.white_piece;
-    int black_count = state.currentBoard.black_piece;
-    long double score = (white_count - black_count) * 100.0;
-
-    int safety_score = 0;
-    int cohesion_score = 0;
-    int push_opportunity_score = 0;
-
-    for (int i = 0; i < state.number_of_place; ++i) {
-        auto pos = state.oneD_to_twoD[i];
-
-        if (state.currentBoard.white[i]) {
-            int edge_dist = state.distance_to_edge(pos);
-            safety_score += edge_dist;
-
-            int neighbors = state.count_neighbors(pos, true);
-            cohesion_score += neighbors;
-
-            if (state.can_push(i)) push_opportunity_score += 1000;
-
-        } else if (state.currentBoard.black[i]) {
-            int edge_dist = state.distance_to_edge(pos);
-            safety_score -= edge_dist;
-
-            int neighbors = state.count_neighbors(pos, false);
-            cohesion_score -= neighbors;
-
-            if (state.can_push(i)) push_opportunity_score -= 1000;
-        }
-    }
-
-    return score + cohesion_score * 5 + safety_score * 1 + push_opportunity_score;
-}
-
-*/
-long double Minimax::heuristic(AbaloneEnv& state){
-
-    int pieces_of_white = 0;
-    int pieces_of_black = 0;
-    int distance_of_white_total = 0;
-    int distance_of_black_total = 0;
     int score = 0;
     for(int oneDpos = 0; oneDpos < state.number_of_place; oneDpos++){
         pair<int, int> position = state.oneD_to_twoD[oneDpos];
         if(state.currentBoard.white[oneDpos]){
-            distance_of_white_total += state.distance_to_center(position);
             pieces_of_white++;
             switch (state.distance_to_center(position))
             {
@@ -222,7 +152,6 @@ long double Minimax::heuristic(AbaloneEnv& state){
         }
         if(state.currentBoard.black[oneDpos]){
             int dis = state.distance_to_center(position);
-            distance_of_black_total += dis;
             pieces_of_black++;
             switch (state.distance_to_center(position))
             {

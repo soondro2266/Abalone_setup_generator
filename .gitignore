@@ -4,8 +4,7 @@ __pycache__
 test
 *.exe
 model
-SomeLocalDir
-SomeLocalDir1
 minmax_result.txt
 epoch-loss.png
 *.txt
+minmax_and_cppEnv

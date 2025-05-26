@@ -67,8 +67,6 @@ void AbaloneAction::load_value(int value){
     return;
 }
 
-AbaloneEnv::AbaloneEnv(){}
-
 AbaloneEnv::AbaloneEnv(int n){
     count = 1;
     number_of_edge = n;
@@ -452,7 +450,6 @@ int AbaloneEnv::twoD_to_oneD(pair<int, int> position){
     }
     return result;
 }
-
 
 int AbaloneEnv::count_neighbors(pair<int, int> pos, bool isWhite){
     int neighbor = 0;
