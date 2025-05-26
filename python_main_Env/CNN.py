@@ -57,7 +57,7 @@ class PolicyNet(nn.Module):
             nn.Dropout(p=0.3),
             nn.Linear(16*(2*n-1)*(2*n-1), 42*(3*n*n-3*n+1)),
         )
-    def forward(self, x):
+    def forward(self, x)-> torch.Tensor:
         x = self.convLayer(x)
         x = self.fullConnect(x)
         x = F.softmax(x, dim=-1)
@@ -100,7 +100,7 @@ class ValueNet(nn.Module):
             nn.Tanh()         
         )
 
-    def forward(self, x):
+    def forward(self, x)-> torch.Tensor:
         """
         x: FloatTensor of shape (batch_size, 4, 2n-1, 2n-1)
         return: FloatTensor of shape (batch_size,)  (scalar value for each state)

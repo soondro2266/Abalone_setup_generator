@@ -22,7 +22,7 @@ def save_model(model: torch.nn, path: str):
 
 
 
-def load_model(path: str, n: int):
+def load_model(path: str, n: int = 5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = PolicyNet(n).to(device)
     model.load_state_dict(torch.load(path))

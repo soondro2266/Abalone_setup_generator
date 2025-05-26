@@ -26,19 +26,20 @@ class MCTS:
 
         self.eta = eta
 
+    @torch.no_grad()
     def one_simulation(self, env:AbaloneEnv)->None:
         with open(self.mcts_record_path, 'r', encoding='utf-8') as f:
             data: dict[str, dict[int, list]] = json.load(f)
         
         state_t_str = env.load_state_string()
         if state_t_str not in data:
-            s = torch.tensor(env.get_state_tensor, dtype=torch.float32).unsqueeze(0).to(self.device)
-            policy_net_probility = self.policy_network(s)
+            s = torch.tensor(env.get_state_tensor(), dtype=torch.float32).unsqueeze(0).to(self.device)
+            policy_net_probility = self.policy_network(s).squeeze(0)
             all_possible_action_t = env.get_all_actions()
             data[state_t_str] = {}
             for action_t in all_possible_action_t:
                 data[state_t_str][action_t] = [0, 0, 0] #pi, N, Vsum
-                data[state_t_str][action_t][0] = policy_net_probility[action]
+                data[state_t_str][action_t][0] = policy_net_probility[action_t].detach().cpu().tolist()
         
         scores = []
         for info in data[state_t_str].values():
@@ -46,16 +47,17 @@ class MCTS:
             scores.append(q + \
                           self.eta * info[0] / (1 + info[1]))
         
-        seleted_action_t = data[state_t_str].keys()[np.argmax(scores)]
+        seleted_action_t = list(data[state_t_str].keys())[np.argmax(scores)]
 
         #selection finished
 
-        env.step(seleted_action_t)
+        env.step(int(seleted_action_t))
 
         #expansion start
 
         all_possible_action_prime = env.get_all_actions()
-        policy_net_probility = self.policy_network(env.get_state_tensor())
+        s = torch.tensor(env.get_state_tensor(), dtype=torch.float32).unsqueeze(0).to(self.device)
+        policy_net_probility = self.policy_network(s).squeeze(0)
 
         all_possible_probility = policy_net_probility[all_possible_action_prime]        
         all_possible_probility = all_possible_probility / all_possible_probility.sum()
@@ -68,15 +70,16 @@ class MCTS:
 
         #evaluation on state t+1
 
-        state = env.get_state_tensor()
-        valueNet_score = self.value_network(state)
+        s = torch.tensor(env.get_state_tensor(), dtype=torch.float32).unsqueeze(0).to(self.device)
+        valueNet_score = self.value_network(s).squeeze(0)
 
 
         done = env.finished
         reward = 0
         while not done:
             all_possible_action = env.get_all_actions()
-            policy_net_probility = self.policy_network(state)
+            s = torch.tensor(env.get_state_tensor(), dtype=torch.float32).unsqueeze(0).to(self.device)
+            policy_net_probility = self.policy_network(s).squeeze(0)
 
             all_possible_probility = policy_net_probility[all_possible_action]        
             all_possible_probility = all_possible_probility / all_possible_probility.sum()
@@ -85,12 +88,22 @@ class MCTS:
             a = dist.sample()  
             action = all_possible_action[a.item()]
 
-            state, reward, done = env.step(action)
+            stepSuccess = False
+            while not stepSuccess:
+                all_possible_probility = policy_net_probility[all_possible_action]        
+                all_possible_probility = all_possible_probility / all_possible_probility.sum()
+
+                dist = torch.distributions.Categorical(all_possible_probility)
+                a = dist.sample()  
+                action = all_possible_action[a.item()]
+                all_possible_action.remove(action)
+                _, reward, done, stepSuccess = env.step(action)
         
         v = 0.5 * (valueNet_score + reward)
 
         data[state_t_str][seleted_action_t][1] += 1
-        data[state_t_str][seleted_action_t][2] += v
+        data[state_t_str][seleted_action_t][2] += v.detach().cpu().item()
+
 
         with open(self.mcts_record_path, 'w', encoding='utf-8') as f:
             # ensure_ascii=False 允許中文不被轉為 \u 編碼
