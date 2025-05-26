@@ -6,19 +6,19 @@ from CNN import PolicyNet, ValueNet
 from AbaloneEnv import AbaloneEnv
 from utils import load_model
 
-model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
+best_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "best_model")
 
-print(model_path)
+print(best_model_path)
 
 
 class MCTS:
-    def __init__(self, n = 5, eta = 1e-4, value_path = "best_model.pth", policy_path = "best_model.pth"):
+    def __init__(self, n: int = 5, eta = 1e-4, value_path = "best_model.pth", policy_path = "best_model.pth"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.value_network = ValueNet(n).to(self.device)
         self.policy_network = PolicyNet(n).to(self.device)
-        self.value_network.load_state_dict(torch.load(model_path+"/valueNet/"+ value_path))
-        self.policy_network.load_state_dict(torch.load(model_path+"/policyNet/"+ policy_path))
-        self.mcts_record_path = model_path + "/mcts.json"
+        self.value_network.load_state_dict(torch.load(best_model_path + "/" + value_path))
+        self.policy_network.load_state_dict(torch.load(best_model_path + "/" + policy_path))
+        self.mcts_record_path = best_model_path + "/mcts.json"
         self.value_network.eval()
         self.policy_network.eval()
         
@@ -28,11 +28,12 @@ class MCTS:
 
     def one_simulation(self, env:AbaloneEnv)->None:
         with open(self.mcts_record_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+            data: dict[str, dict[int, list]] = json.load(f)
         
         state_t_str = env.load_state_string()
         if state_t_str not in data:
-            policy_net_probility = self.policy_network(env.get_state_tensor())
+            s = torch.tensor(env.get_state_tensor, dtype=torch.float32).unsqueeze(0).to(self.device)
+            policy_net_probility = self.policy_network(s)
             all_possible_action_t = env.get_all_actions()
             data[state_t_str] = {}
             for action_t in all_possible_action_t:

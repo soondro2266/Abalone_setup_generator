@@ -65,13 +65,13 @@ class PolicyNet(nn.Module):
     
 
 class ValueNet(nn.Module):
-    def __init__(self, n):
+    def __init__(self, n: int):
         """
         n: Abalone 棋盤半徑參數，原始大小為 (2*n-1)*(2*n-1)
         輸入通道數同樣是 4(state tensor shape: (4, 2n-1, 2n-1))。
         """
         super(ValueNet, self).__init__()
-        self.n = n
+        self.n: int = n
 
         # 1) shared 卷積特徵抽取層（完全照搬 Policy 的 convLayer）
         self.convLayer = nn.Sequential(
@@ -94,8 +94,10 @@ class ValueNet(nn.Module):
         self.fc = nn.Sequential(
             nn.Flatten(),
             nn.Linear(feat_dim, hidden_dim),
+            nn.Dropout(0.3),
             nn.ReLU(inplace=True),
-            nn.Linear(hidden_dim, 1),   # 輸出一個標量 v(s)                   
+            nn.Linear(hidden_dim, 1),   # 輸出一個標量 v(s)          
+            nn.Tanh()         
         )
 
     def forward(self, x):
@@ -195,11 +197,10 @@ def train_ValueNet(value_net, states, T, n, policy_reward, optimizer, device):
     U = torch.tensor([policy_reward * (gamma ** (T - 1 - t)) for t in range(T)], device=device)
 
     V_hat = value_net(S)
-    loss  = F.mse_loss(V_hat, U, reduction='mean')
+    loss  = F.l1_loss(V_hat, U, reduction='mean')
 
     optimizer.zero_grad()
     loss.backward()
-    torch.nn.utils.clip_grad_norm_(value_net.parameters(), 5.0)
     optimizer.step()
 
     return loss
