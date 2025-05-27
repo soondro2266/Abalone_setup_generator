@@ -126,12 +126,18 @@ def pretrain(model: CNN, train_loader: DataLoader, criterion, optimizer, device)
     avg_loss = total_loss/num_batch
     return avg_loss
 
-def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, optimizer, device: torch.device)-> torch.Tensor:
+def train_PolicyNet(env: AbaloneEnv, 
+                    policy: PolicyNet, 
+                    opponent: PolicyNet, 
+                    optimizer, 
+                    device: torch.device, 
+                    penalty_coef: float = 0.1)-> torch.Tensor:
     policy.train()
     opponent.eval()
     log_probs = []
     reward = 0
     policy_reward = 0
+    penalty_sum  = 0.0
     state = env.get_state_tensor()
     done = False
 
@@ -146,26 +152,30 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
             with torch.no_grad():
                 probs = opponent(s).squeeze(0)
 
-        all_possible_action = env.get_all_actions()  
+        legal_action_index = env.get_all_actions()
+        illegal_mask = torch.ones_like(probs) #1 is illegal 0 is legal
+        illegal_mask[legal_action_index] = 0
+        illegal_prob = (probs * illegal_mask).sum()
         
         stepSuccess = False
         while not stepSuccess:
-            legal_probs = probs[all_possible_action]        
+            legal_probs = probs[legal_action_index]
             if legal_probs.sum() == 0:
                 legal_probs = torch.ones_like(legal_probs) / len(legal_probs)
             else:
                 legal_probs = legal_probs / legal_probs.sum()
-            legal_probs = legal_probs / legal_probs.sum()
             dist = torch.distributions.Categorical(legal_probs)
-            a = dist.sample()
+            a   = dist.sample()
             idx_in_legal = a.item()
-            action = all_possible_action[idx_in_legal]
+            action = legal_action_index[idx_in_legal]
             state, reward, done, stepSuccess = env.step(action)
             if not stepSuccess:
-                all_possible_action.remove(action)
+                legal_action_index.remove(action)
 
         if player[turn] == policy:  
             log_probs.append(dist.log_prob(a))
+            penalty_sum += illegal_prob
+
 
         del dist, a, legal_probs, probs, s
         turn *= -1
@@ -177,17 +187,26 @@ def train_PolicyNet(env: AbaloneEnv, policy: PolicyNet, opponent: PolicyNet, opt
         
     returns = torch.full((len(log_probs),), policy_reward,dtype=torch.float32,device=device)
 
-    loss = 0
+    pg_loss = 0
     for log_p, Gt in zip(log_probs, returns):
-        loss = loss - log_p * Gt
-    loss = loss / len(log_probs) 
+        pg_loss = pg_loss - log_p * Gt
+    pg_loss = pg_loss / len(log_probs) 
 
-    loss = loss.to(device)
+    penalty_loss = penalty_coef * (penalty_sum / len(log_probs))
+
+    loss = pg_loss + penalty_loss
+
     optimizer.zero_grad()
+    print("pg_loss.requires_grad      =", pg_loss.requires_grad)
+    print("pg_loss.grad_fn            =", pg_loss.grad_fn)
+    print("penalty_loss.requires_grad =", penalty_loss.requires_grad)
+    print("penalty_loss.grad_fn       =", penalty_loss.grad_fn)
+    print("total loss.requires_grad   =", loss.requires_grad)
+    print("total loss.grad_fn         =", loss.grad_fn)
     loss.backward()
     optimizer.step()
-
     torch.cuda.empty_cache()
+
     return loss
 
 def train_ValueNet(value_net, states, T, n, policy_reward, optimizer, device):
