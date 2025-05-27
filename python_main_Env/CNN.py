@@ -203,4 +203,8 @@ def train_ValueNet(value_net, states, T, n, policy_reward, optimizer, device):
     loss.backward()
     optimizer.step()
 
-    return loss
+    loss_ = loss.detach().cpu().item()
+
+    del loss, V_hat, S, U
+
+    return loss_

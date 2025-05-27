@@ -40,14 +40,14 @@ def play(policy_, opponent_):
         stepSuccess = False
         while not stepSuccess:
             legal_probs = probs[all_possible_action]        
-            if legal_probs.sum() == 0:
+            if legal_probs.sum() < 1e-8:
                 legal_probs = torch.ones_like(legal_probs) / len(legal_probs)
             else:
                 legal_probs = legal_probs / legal_probs.sum()
 
             dist = torch.distributions.Categorical(legal_probs)
             a = dist.sample()
-            idx_in_legal = a.item()   
+            idx_in_legal = a.detach().cpu().item()   
             best_action = all_possible_action[idx_in_legal]
             _, _, terminate, stepSuccess = env.step(best_action)
             all_possible_action.remove(best_action)

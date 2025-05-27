@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import gc
 from utils import preTrainDataset
 from utils import save_model, load_model, draw
 from torch.utils.data import DataLoader
@@ -68,9 +69,9 @@ def RL_valueNetwork():
     epoch = 1000
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     value_net = ValueNet(n).to(device)
-    optimizer = torch.optim.Adam(value_net.parameters(), lr=1e-5)
-    policy = load_model('./python_main_Env/bestPolicyModel.pth', n)
-    opponent = load_model('./python_main_Env/bestPolicyModel.pth', n)
+    optimizer = torch.optim.Adam(value_net.parameters(), lr=1e-8)
+    policy = load_model('./python_main_Env/model/bestModel.pth', n)
+    opponent = load_model('./python_main_Env/model/bestModel.pth', n)
     losses = []
 
     min_loss = 1e10
@@ -79,13 +80,16 @@ def RL_valueNetwork():
         if policy_reward == 0:
             policy_reward = -1
         loss = train_ValueNet(value_net, states, T, n, policy_reward, optimizer, device)
-        losses.append(loss.detach().item())
+        losses.append(loss)
 
         save_model(value_net, f'./python_main_Env/model/valueNet/value_{i}.pth')
 
         if loss < min_loss:
             save_model(value_net, f'./python_main_Env/bestValueModel2.pth')
             min_loss = loss
+
+        torch.cuda.empty_cache()
+        gc.collect()
 
     draw(epoch, losses)
 

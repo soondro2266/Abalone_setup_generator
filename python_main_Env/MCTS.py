@@ -70,9 +70,11 @@ class MCTS:
 
         #evaluation on state t+1
 
+        """
         s = torch.tensor(env.get_state_tensor(), dtype=torch.float32).unsqueeze(0).to(self.device)
         valueNet_score = self.value_network(s).squeeze(0)
-
+        """
+        
 
         done = env.finished
         reward = 0
@@ -99,10 +101,10 @@ class MCTS:
                 all_possible_action.remove(action)
                 _, reward, done, stepSuccess = env.step(action)
         
-        v = 0.5 * (valueNet_score + reward)
+        v = reward
 
         data[state_t_str][seleted_action_t][1] += 1
-        data[state_t_str][seleted_action_t][2] += v.detach().cpu().item()
+        data[state_t_str][seleted_action_t][2] += v
 
 
         with open(self.mcts_record_path, 'w', encoding='utf-8') as f:
