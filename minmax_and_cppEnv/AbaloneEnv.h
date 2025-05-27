@@ -8,23 +8,37 @@
 using namespace std;
 
 /**
- * 
+ * ### AbaloneAction
+ * The action on the Abalone
  */
 class AbaloneAction{
     public:
+    /**
+     * @brief How many pieces move together
+     */
     int numberofpiece;
+    /**
+     * @brief One-dimenson position of the first piece
+     */
     int oneDpos;
     /**
-     * one piece
-     * first :[0, 5]
-     * second :0
-     * two and three pieces
-     * first :[0, 5] the direction of otherpiece
-     * second :[-1,1]
+     * @brief Direction of movement
+     * 
+     * `first`: Direction of first piece to other pieces
+     * 
+     * (The movement of one pieces)
+     * 
+     * [0, 5] 
+     * 
+     * `second`: The gap between movement direction and align direction
+     * 
+     * [-1, 1]
      */
     pair<int, int> direction;
     /**
-     * @brief type of action according to number of piece and second direction
+     * @brief Type of action
+     * 
+     * According to number of piece and second direction
      * 
      * `0`: 1 piece
      * 
@@ -41,10 +55,43 @@ class AbaloneAction{
      * `6`: 3 pieces ,sec_dir = 1
     */
     int type = 0;
+    /**
+     * default constructor
+     */
     AbaloneAction(){}
+    /**
+     * @brief Set the type
+     * 
+     * Use the number of pieces and second direction to set the type
+     */
     void set_type();
+    /**
+     * @brief Load the type
+     * 
+     * Use the type to set the second direction and number of pieces
+     */
     void load_type();
+    /**
+     * @brief #### Get the action value
+     * 
+     * One action has one unique action value
+     * 
+     * Consider a 3-D array 
+     * 
+     * `first Dimension`: oneDpos
+     * 
+     * `second Dimension`: type
+     * 
+     * `third Dimension`: first direction
+     *
+     * The action value is the index of this action on this array
+     * 
+     * (after flatten)
+     */
     int value();
+    /**
+     * @brief use value to set up action
+     */
     void load_value(int value);
 };
 
@@ -68,7 +115,7 @@ public:
     AbaloneEnv(){};
 
     /**
-     * @brief initialize AbaloneEnv with edge = n，set currentBoard = new board
+     * @brief initialize AbaloneEnv with edge = n
      */
     AbaloneEnv(int n);
 
@@ -90,7 +137,7 @@ public:
     void load_default_setup();
 
     /**
-     * @brief setting board with designated position of white、black chess 
+     * @brief setting board with designated position of white、black piece
      */
     void load_customize_setup(vector<int> white_setup, vector<int> black_setup);
 
@@ -100,25 +147,25 @@ public:
     void show_current_board();
 
     /**
-     * @brief look for all possible move for only moving one chess
+     * @brief look for all possible move for only moving one piece
      * @param candidate record all possible moves
      */
     void get_one_piece_Next(NextBoards& candidate);
 
     /**
-     * @brief look for all possible move for moving exactly two chess
+     * @brief look for all possible move for moving exactly two pieces
      * @param candidate record all possible moves
      */
     void get_two_piece_Next(NextBoards& candidate);
 
     /**
-     * @brief look for all possible move for moving exactly three chess
+     * @brief look for all possible move for moving exactly three pieces
      * @param candidate record all possible moves
      */
     void get_three_piece_Next(NextBoards& candidate);
 
     /**
-     * @brief called by population to implement bfs recusively
+     * @brief called by population to implement dfs recusively
      */
     void visit_population(pair<int, int> position, vector<vector<bool>>& visited, bool player);
     
