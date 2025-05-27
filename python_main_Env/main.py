@@ -95,6 +95,6 @@ def RL_valueNetwork():
 
 
 if __name__ == '__main__':
-    #behavior_cloning()
-    #RL_policyNetwork()
-    RL_valueNetwork()
+    behavior_cloning()
+    RL_policyNetwork()
+    #RL_valueNetwork()

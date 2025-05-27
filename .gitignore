@@ -6,3 +6,4 @@ test
 model
 minmax_result.txt
 epoch-loss.png
+minmax_results

@@ -161,9 +161,8 @@ def train_PolicyNet(env: AbaloneEnv,
         while not stepSuccess:
             legal_probs = probs[legal_action_index]
             if legal_probs.sum() == 0:
-                legal_probs = torch.ones_like(legal_probs) / len(legal_probs)
-            else:
-                legal_probs = legal_probs / legal_probs.sum()
+                legal_probs = legal_probs + 1e-8
+            legal_probs = legal_probs / legal_probs.sum()
             dist = torch.distributions.Categorical(legal_probs)
             a   = dist.sample()
             idx_in_legal = a.item()
