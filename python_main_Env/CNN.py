@@ -196,12 +196,6 @@ def train_PolicyNet(env: AbaloneEnv,
     loss = pg_loss + penalty_loss
 
     optimizer.zero_grad()
-    print("pg_loss.requires_grad      =", pg_loss.requires_grad)
-    print("pg_loss.grad_fn            =", pg_loss.grad_fn)
-    print("penalty_loss.requires_grad =", penalty_loss.requires_grad)
-    print("penalty_loss.grad_fn       =", penalty_loss.grad_fn)
-    print("total loss.requires_grad   =", loss.requires_grad)
-    print("total loss.grad_fn         =", loss.grad_fn)
     loss.backward()
     optimizer.step()
     torch.cuda.empty_cache()
@@ -215,7 +209,7 @@ def train_ValueNet(value_net, states, T, n, policy_reward, optimizer, device):
     U = torch.tensor([policy_reward * (gamma ** (T - 1 - t)) for t in range(T)], device=device)
 
     V_hat = value_net(S)
-    loss  = F.l1_loss(V_hat, U, reduction='mean')
+    loss  = F.mse_loss(V_hat, U, reduction='mean')
 
     optimizer.zero_grad()
     loss.backward()

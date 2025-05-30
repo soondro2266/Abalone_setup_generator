@@ -74,7 +74,7 @@ def play_mcts(mcts_p: MCTS, policy_op: PolicyNet, mcts_record: str, num_of_simu:
 
 if __name__ == '__main__':
     
-    policy_path_p = "bestModel.pth"
+    policy_path_p = "bestPolicyModel_.pth"
     value_path_p = "bestValueModel.pth"
     policy_path_op = model_path + "/policyNetwork_pretrain.pth"
     mcts_p = MCTS(value_path=value_path_p, policy_path=policy_path_p)

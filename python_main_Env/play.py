@@ -40,10 +40,9 @@ def play(policy_, opponent_):
         stepSuccess = False
         while not stepSuccess:
             legal_probs = probs[all_possible_action]        
-            if legal_probs.sum() < 1e-8:
-                legal_probs = torch.ones_like(legal_probs) / len(legal_probs)
-            else:
-                legal_probs = legal_probs / legal_probs.sum()
+            if legal_probs.sum() == 0:
+                legal_probs = legal_probs + 1e-8
+            legal_probs = legal_probs / legal_probs.sum()
 
             dist = torch.distributions.Categorical(legal_probs)
             a = dist.sample()
@@ -78,4 +77,4 @@ def multi_play(policy_model_name: str, opponent_model_name: str, round_: int, n:
     print(f"opponent win: {opponent_wins}/{round}, using model: {opponent_model_name}")
 
 if __name__ == '__main__':
-    multi_play("model/policyNetwork_pretrain", "bestModel", 50, 5)
+    multi_play("bestModel", "model/policyNetwork_pretrain", 50, 5)
