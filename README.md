@@ -16,14 +16,18 @@
 ### 2.MCTS+RL:
 > 2.1 Behavior cloning
 > > use the result of Minimax
+
 > 2.2 CNN
 > > convolution Layer (channel = 4)
 > > Linear Layer (Full Connect)
+
 > 2.3 Policy network
 > > structure of CNN
-> > generate a list of probability 
+> > generate a list of probability
+
 > 2.4 Value network
 > > CNN structure + Tanh to generate a output in[-1, 1]
+
 > 2.5 MCTS
 > > 2.5.1 selection
 > > 2.5.2 rollout
