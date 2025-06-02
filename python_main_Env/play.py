@@ -77,4 +77,4 @@ def multi_play(policy_model_name: str, opponent_model_name: str, round_: int, n:
     print(f"opponent win: {opponent_wins}/{round}, using model: {opponent_model_name}")
 
 if __name__ == '__main__':
-    multi_play("bestModel", "model/policyNetwork_pretrain", 50, 5)
+    multi_play("model/policy_500", "model/policyNetwork_pretrain", 50, 5)

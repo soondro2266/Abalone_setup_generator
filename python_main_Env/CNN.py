@@ -113,18 +113,21 @@ def pretrain(model: CNN, train_loader: DataLoader, criterion, optimizer, device)
     model.train()
     total_loss = 0.0
     num_batch = 0.0
-    for data, label in tqdm(train_loader):
-        data = data.to(device)
-        label = label.to(device)
-        optimizer.zero_grad()
-        pi_hat = model(data)
-        train_loss = criterion(pi_hat, label)
-        train_loss.backward()
-        optimizer.step()
-        total_loss += train_loss.detach().item()
-        num_batch += 1.0
+    losses = []
+    for _ in range(100):
+        for data, label in tqdm(train_loader):
+            data = data.to(device)
+            label = label.to(device)
+            optimizer.zero_grad()
+            pi_hat = model(data)
+            train_loss = criterion(pi_hat, label)
+            train_loss.backward()
+            optimizer.step()
+            total_loss += train_loss.detach().item()
+            losses.append(train_loss.detach().cpu().item())
+            num_batch += 1.0
     avg_loss = total_loss/num_batch
-    return avg_loss
+    return avg_loss, losses, num_batch
 
 def train_PolicyNet(env: AbaloneEnv, 
                     policy: PolicyNet, 

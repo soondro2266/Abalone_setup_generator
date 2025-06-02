@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from CNN import CNN, PolicyNet
+from CNN import CNN, PolicyNet, ValueNet
 import matplotlib.pyplot as plt
 
 class preTrainDataset(Dataset):
