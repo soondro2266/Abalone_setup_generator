@@ -8,163 +8,23 @@
 > 4.  Generate initial setup win rate is 50/50 which evaluated by trained model.
 
 ### 1.Enviorment:
+> Board Indexing System
+> Action Encoding and Classification
+> Generating Legal Moves
+> Applying an Action to the Game State
 
 ### 2.MCTS+RL:
 > 2.1 Behavior cloning
+> > use the result of Minimax
 > 2.2 CNN
+> > convolution Layer (channel = 4)
+> > Linear Layer (Full Connect)
 > 2.3 Policy network
-> 2.4 Value network
+> > structure of CNN
 > > generate a list of probability 
+> 2.4 Value network
+> > CNN structure + Tanh to generate a output in[-1, 1]
 > 2.5 MCTS
 > > 2.5.1 selection
 > > 2.5.2 rollout
 > > 2.5.3 backpropagation
-### 3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
