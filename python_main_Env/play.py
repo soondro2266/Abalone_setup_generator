@@ -12,8 +12,10 @@ def play(policy_, opponent_):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     policy = policy_
     opponent = opponent_
-    policy.eval()
-    opponent.eval()
+    if not policy is None:
+        policy.eval()
+    if not opponent is None:
+        opponent.eval()
     policy_win = 0
     opponent_win = 0
     states = []
@@ -30,10 +32,17 @@ def play(policy_, opponent_):
             T += 1
         s = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(device)
 
-        probs = player[turn](s).squeeze(0)
-
         all_possible_action = env.get_all_actions()  
-        
+
+        if player[turn] == None:
+            probs = torch.full(
+                (2562,),
+                1.0 / 2562,
+                dtype=torch.float32,
+                device=device
+            )
+        else:
+            probs = player[turn](s).squeeze(0)
 
         turn *= -1
 
@@ -61,9 +70,15 @@ def play(policy_, opponent_):
     states = tuple(states)
     return policy_win, opponent_win, states, T
 
-def multi_play(policy_model_name: str, opponent_model_name: str, round_: int, n: int):
-    policy = load_model(f"./python_main_Env/{policy_model_name}.pth", n)
-    opponent = load_model(f"./python_main_Env/{opponent_model_name}.pth", n)
+def multi_play(round_: int, n: int, policy_model_name: str = None, opponent_model_name: str = None):
+    if policy_model_name == None:
+        policy = None
+    else:
+        policy = load_model(f"./python_main_Env/{policy_model_name}.pth", n)
+    if opponent_model_name == None:
+        opponent = None
+    else:
+        opponent = load_model(f"./python_main_Env/{opponent_model_name}.pth", n)
     round = round_
     policy_wins = 0
     opponent_wins = 0
@@ -77,4 +92,4 @@ def multi_play(policy_model_name: str, opponent_model_name: str, round_: int, n:
     print(f"opponent win: {opponent_wins}/{round}, using model: {opponent_model_name}")
 
 if __name__ == '__main__':
-    multi_play("model/policy_500", "model/policyNetwork_pretrain", 50, 5)
+    multi_play(50, 5, "model/policy_500", "model/policyNetwork_pretrain")
